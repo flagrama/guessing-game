@@ -5,11 +5,18 @@ import unittest
 
 class BasicTestCase(unittest.TestCase):
 
-    def test_index(self):
-        tester = app.test_client(self)
-        response = tester.get('/', base_url='https://localhost', content_type='html/text')
+    def setUp(self):
+        app.testing = True
+        self.app = app.test_client()
+
+    def test_redirect_to_https(self):
+        response = self.app.get('/', content_type='html/text')
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('https', response.location)
+
+    def test_index_exists(self):
+        response = self.app.get('/', content_type='html/text', base_url='https://localhost')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, b'Hello, World!')
 
 
 if __name__ == '__main__':
