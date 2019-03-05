@@ -1,21 +1,22 @@
-from web.app import app
-
 import unittest
+
+from web.app import create_app
 
 
 class BasicTestCase(unittest.TestCase):
 
     def setUp(self):
-        app.testing = True
-        self.app = app.test_client()
+        config_name = 'https'
+        app = create_app(config_name)
+        self.client = app.test_client()
 
     def test_redirect_to_https(self):
-        response = self.app.get('/', content_type='html/text')
+        response = self.client.get('/', content_type='html/text')
         self.assertEqual(response.status_code, 302)
         self.assertIn('https', response.location)
 
     def test_index_exists(self):
-        response = self.app.get('/', content_type='html/text', base_url='https://localhost')
+        response = self.client.get('/', content_type='html/text', base_url='https://localhost')
         self.assertEqual(response.status_code, 200)
 
 
