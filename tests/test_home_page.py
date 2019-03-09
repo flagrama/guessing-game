@@ -13,6 +13,10 @@ class HomePageTest(TestCase):
         self.client = app.test_client()
         return app
 
+    def test_uses_home_template(self):
+        response = self.client.get('/')
+        self.assert_template_used('home.html')
+
     def test_root_url_resolves_to_home_page_view(self):
         response = self.client.get('/', content_type='html/text')
         self.assertIn(
