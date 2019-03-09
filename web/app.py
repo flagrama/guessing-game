@@ -6,7 +6,7 @@ main = Blueprint('app_main', __name__)
 
 @main.route('/')
 def hello():
-    return 'Hello, World!'
+    return 'Log In with Twitch'
 
 
 def create_app(config='dev'):

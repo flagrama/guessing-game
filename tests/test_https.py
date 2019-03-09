@@ -3,7 +3,7 @@ import unittest
 from web.app import create_app
 
 
-class BasicTestCase(unittest.TestCase):
+class HttpsTest(unittest.TestCase):
 
     def setUp(self):
         config_name = 'https'
