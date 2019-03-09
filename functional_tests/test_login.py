@@ -27,6 +27,8 @@ class LoginTest(TestCase):
         options = webdriver.ChromeOptions()
         if 'GOOGLE_CHROME_BIN' in environ:
             options.binary_location = environ['GOOGLE_CHROME_BIN']
+        options.add_argument('no-sandbox')
+        options.add_argument('disable-dev-shm-usage')
         options.add_argument('headless')
         self.driver = webdriver.Chrome(options=options)
 
