@@ -2,6 +2,7 @@
     "environments": {
         "test": {
         "scripts": {
+            "test-setup": "pip install -r requirements-test.txt",
             "test": "python -m unittest discover"
             }
         }
