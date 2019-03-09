@@ -9,9 +9,15 @@
     <h1>Guessing Game</h1>
     <ul>
         <li>
-            <button>
-                <a href="#">Log In with Twitch</a>
+            {% if session['twitch_token'] %}
+            <button id="logout">
+                <a href="#">Log Out</a>
             </button>
+            {% else %}
+            <button id="login_with_twitch">
+                <a href="{{ url_for('app_main.login') }}">Log In with Twitch</a>
+            </button>
+            {% endif %}
         </li>
     </ul>
 </nav>
