@@ -17,13 +17,6 @@ class HomePageTest(TestCase):
         response = self.client.get('/')
         self.assert_template_used('home.html')
 
-    def test_root_url_resolves_to_home_page_view(self):
-        response = self.client.get('/', content_type='html/text')
-        self.assertIn(
-            'Log In with Twitch',
-            str(response.data)
-        )
-
 
 if __name__ == '__main__':
     unittest.main()
