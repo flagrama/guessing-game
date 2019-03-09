@@ -1,5 +1,6 @@
 import unittest
 import subprocess
+from os import environ
 
 from flask_testing import TestCase
 from selenium import webdriver
@@ -24,6 +25,8 @@ class LoginTest(TestCase):
             '--keyfile=util/server.key'
         ])
         options = webdriver.ChromeOptions()
+        if 'GOOGLE_CHROME_BIN' in environ:
+            options.binary_location = environ['GOOGLE_CHROME_BIN']
         options.add_argument('headless')
         self.driver = webdriver.Chrome(options=options)
 

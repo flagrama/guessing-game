@@ -1,6 +1,10 @@
 {
     "environments": {
         "test": {
+            "buildpacks": [
+                { "url":  "https://github.com/heroku/heroku-buildpack-google-chrome" },
+                { "url":  "https://github.com/heroku/heroku-buildpack-chromedriver" }
+            ],
         "scripts": {
             "test-setup": "pip install -r requirements-test.txt",
             "test": "python -m unittest discover"
