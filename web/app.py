@@ -1,4 +1,6 @@
-from flask import Flask, Blueprint
+from flask import (
+    Flask, Blueprint, render_template
+)
 from flask_talisman import Talisman
 
 main = Blueprint('app_main', __name__)
@@ -6,7 +8,7 @@ main = Blueprint('app_main', __name__)
 
 @main.route('/')
 def hello():
-    return 'Log In with Twitch'
+    return render_template('home.html')
 
 
 def create_app(config='dev'):
