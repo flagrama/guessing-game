@@ -5,6 +5,15 @@
     <title>Welcome - Guessing Game</title>
 </head>
 <body>
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
 <nav>
     <h1>Guessing Game</h1>
     <ul>
