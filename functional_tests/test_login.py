@@ -57,7 +57,7 @@ class LoginTest(TestCase):
         self.driver.implicitly_wait(5)
         twitch_authorize_button = self.driver.find_elements_by_css_selector('button.js-authorize')
         if twitch_authorize_button:
-            twitch_authorize_button.click()
+            self.driver.find_element_by_css_selector('button.js-authorize').click()
 
         # He clicks the button and is directed to the Guessing Game home page
         logout_button = self.driver.find_element_by_id('logout')
