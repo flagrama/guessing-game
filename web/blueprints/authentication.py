@@ -27,13 +27,6 @@ def login():
 
 @authentication.route('/login/authorized')
 def authorized():
-    if 'TEST_AUTH' in app.config:
-        session['twitch_token'] = 'abc123'
-        return redirect('/')
-    if 'TEST_FAIL' in app.config:
-        flash('Access denied')
-        return redirect('/')
-
     redirect_uri = f"redirect_uri={url_for('authentication.authorized', _external=True)}"
     authorization_code = request.args.get('code')
     csrf_state = request.args.get('state')
