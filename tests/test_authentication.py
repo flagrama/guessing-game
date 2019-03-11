@@ -58,6 +58,16 @@ class LoginRedirectTest(TestCase):
         with self.client.session_transaction() as session:
             self.assertTrue('twitch_token' in session)
 
+    def test_logout(self):
+        with self.client.session_transaction() as session:
+            session['twitch_token'] = 'abc123'
+        self.client.get('/')
+        with self.client.session_transaction() as session:
+            self.assertTrue('twitch_token' in session)
+        self.client.get('/logout', follow_redirects=True)
+        with self.client.session_transaction() as session:
+            self.assertFalse('twitch_token' in session)
+
 
 if __name__ == '__main__':
     unittest.main()

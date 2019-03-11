@@ -48,3 +48,9 @@ def authorized():
             resp = json.loads(resp.text)
             session['twitch_token'] = (resp['access_token'])
     return redirect('/')
+
+
+@authentication.route('/logout')
+def logout():
+    session.pop('twitch_token', None)
+    return redirect('/')
