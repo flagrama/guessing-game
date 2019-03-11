@@ -14,7 +14,7 @@ class HomePageTest(TestCase):
         return app
 
     def test_uses_home_template(self):
-        response = self.client.get('/')
+        self.client.get('/')
         self.assert_template_used('home.html')
 
 
