@@ -4,6 +4,7 @@ from os import environ
 
 from flask_testing import TestCase
 from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 
 from web.app import create_app
 
@@ -47,8 +48,18 @@ class LoginTest(TestCase):
             'Log In with Twitch'
         )
 
-        # He clicks the button and is directed to the Guessing Game home page
+        # He deals with the Twitch Authorization workflow
         login_button.click()
+        self.driver.find_element_by_name('username').send_keys(environ['TWITCH_ACCOUNT_USERNAME'], Keys.TAB)
+        self.driver.find_element_by_name('password').send_keys(environ['TWITCH_ACCOUNT_PASSWORD'])
+        twitch_login_button = self.driver.find_element_by_css_selector('button.js-login-button')
+        twitch_login_button.click()
+        self.driver.implicitly_wait(5)
+        twitch_authorize_button = self.driver.find_elements_by_css_selector('button.js-authorize')
+        if twitch_authorize_button:
+            twitch_authorize_button.click()
+
+        # He clicks the button and is directed to the Guessing Game home page
         logout_button = self.driver.find_element_by_id('logout')
         self.assertIn(
             'Log Out',
