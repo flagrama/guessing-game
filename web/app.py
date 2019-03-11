@@ -1,20 +1,7 @@
-from flask import (
-    Flask, Blueprint, render_template, redirect, session
-)
+from flask import Flask
 from flask_talisman import Talisman
-
-main = Blueprint('app_main', __name__)
-
-
-@main.route('/')
-def hello():
-    return render_template('home.html')
-
-
-@main.route('/login')
-def login():
-    session['twitch_token'] = True
-    return redirect('/')
+from .blueprints.main import main
+from .blueprints.authentication import authentication
 
 
 def create_app(config='dev'):
@@ -22,6 +9,7 @@ def create_app(config='dev'):
     if not config == 'testing':
         Talisman(app)
     app.register_blueprint(main)
+    app.register_blueprint(authentication)
     app.secret_key = 'development'
 
     return app

@@ -18,10 +18,9 @@ class LoginRedirectTest(TestCase):
         self.assert_redirects(response, '/')
 
     def test_twitch_token_set(self):
-        response = self.client.get('/login')
+        self.client.get('/login')
         with self.client.session_transaction() as session:
             self.assertTrue(session['twitch_token'])
-
 
 
 if __name__ == '__main__':
