@@ -6,6 +6,7 @@ from flask import current_app as app
 from flask_testing import TestCase
 
 from web.app import create_app
+from tests.mocks import mocked_requests
 
 
 class LoginRedirectTest(TestCase):
@@ -15,42 +16,6 @@ class LoginRedirectTest(TestCase):
         app = create_app(config_name)
         self.client = app.test_client()
         return app
-
-    # This method will be used by the mock to replace requests.get
-    def mocked_requests(*args, **kwargs):
-        class MockResponse:
-            def __init__(self, text, status_code, headers=None):
-                self.text = text
-                self.status_code = status_code
-                self.headers = headers
-
-            def text(self):
-                return self.text
-
-            def status_code(self):
-                return self.status_code
-
-            def headers(self):
-                return self.headers
-
-        if 'noauth' in args[0]:
-            return None
-        if 'badapicall' in args[0]:
-            return MockResponse("""{"error": "Unauthorized","""
-                                + """ "message": "Token invalid or missing required scope","""
-                                  + """"status": 401}""",
-                                401,
-                                """{"www-authenticate": "OAuth realm='TwitchTV', error='invalid_token'"}""")
-        if '/token' in args[0] and 'grant_type=authorization_code' in args[0]:
-            return MockResponse("""{"access_token": "abc123", "refresh_token": "def456"}""", 200)
-        if '/token' in args[0] and 'grant_type=refresh_token' in args[0]:
-            return MockResponse("""{"access_token": "ghi789", "refresh_token": "jkl000"}""", 200)
-        if '/validate' in args[0]:
-            return MockResponse(None, 200)
-        if '/revoke' in args[0]:
-            return MockResponse(None, 200)
-
-        return MockResponse(None, 404)
 
     def test_login_button_navigates_to_twitch(self):
         response = self.client.get('/login')

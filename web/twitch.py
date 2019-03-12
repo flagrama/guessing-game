@@ -33,8 +33,8 @@ def create_token(authorization_code, redirect_uri):
 def validate_token(token):
     response = requests.get(twitch_base + '/validate', headers={'Authorization': f'OAuth {token}'})
     if response.status_code != 200:
-        return False
-    return True
+        return None
+    return json.loads(response.text)
 
 
 def revoke_token(token):
