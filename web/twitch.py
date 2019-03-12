@@ -17,3 +17,8 @@ class Twitch:
         if response.status_code != 200:
             return False
         return True
+
+    def revoke_token(self, token):
+        requests.post(self.twitch_base + '/revoke'
+                      + '?client_id=' + self.client_id
+                      + '&token=' + token)

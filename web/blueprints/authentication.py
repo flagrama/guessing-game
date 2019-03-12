@@ -54,5 +54,5 @@ def authorized():
 
 @authentication.route('/logout')
 def logout():
-    session.pop('twitch_token', None)
+    Twitch.revoke_token(session.pop('twitch_token', None))
     return redirect('/')
