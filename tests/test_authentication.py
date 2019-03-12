@@ -58,6 +58,7 @@ class LoginRedirectTest(TestCase):
         self.client.get('/')
         with self.client.session_transaction() as session:
             self.assertTrue('twitch_token' in session)
+            self.assertTrue('twitch_login' in session)
 
     def test_invalid_token(self):
         with self.client.session_transaction() as session:

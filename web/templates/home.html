@@ -19,6 +19,9 @@
     <ul>
         <li>
             {% if session['twitch_token'] %}
+            <h1>Hello, {{ session['twitch_login'] }}</h1>
+            <p>{{ session['twitch_token'] }}</p>
+            <p>{{ session['twitch_refresh_token'] }}</p>
             <button id="logout">
                 <a href="{{ url_for('authentication.logout') }}">Log Out</a>
             </button>

@@ -15,9 +15,15 @@ def hello():
 @main.before_request
 def validate_and_refresh_token():
     if 'twitch_token' in session:
-        if not twitch.validate_token(session['twitch_token']):
+        validation_json = twitch.validate_token(session['twitch_token'])
+        if not validation_json:
             session.pop('twitch_token')
             session.pop('twitch_refresh_token')
+            session.pop('twitch_login', None)
+            session.pop('twitch_user_id', None)
+        else:
+            session['twitch_login'] = validation_json['login']
+            session['twitch_user_id'] = validation_json['user_id']
         # elif 'twitch_refresh_token' in session:
         #     json = twitch.refresh_token(session['twitch_refresh_token'])
         #     if json is None:
