@@ -10,6 +10,8 @@ from web.twitch import Twitch
 
 authentication = Blueprint('authentication', __name__)
 
+Twitch = Twitch()
+
 
 @authentication.route('/login')
 def login():

@@ -17,7 +17,7 @@ class LoginRedirectTest(TestCase):
         return app
 
     # This method will be used by the mock to replace requests.get
-    def mocked_requests_post(*args, **kwargs):
+    def mocked_requests(*args, **kwargs):
         class MockResponse:
             def __init__(self, text, status_code):
                 self.text = text
@@ -30,6 +30,8 @@ class LoginRedirectTest(TestCase):
             return None
         if '/token' in args[0]:
             return MockResponse("""{"access_token": "abc123"}""", 200)
+        if '/validate' in args[0]:
+            return MockResponse(None, 200)
 
         return MockResponse(None, 404)
 
@@ -47,24 +49,37 @@ class LoginRedirectTest(TestCase):
         response = self.client.get('/login/authorized', follow_redirects=True)
         self.assertTrue('Access denied' in str(response.data))
 
-    @mock.patch('requests.post', side_effect=mocked_requests_post)
+    @mock.patch('requests.post', side_effect=mocked_requests)
     def test_twitch_not_authorized(self, mock_post):
         response = self.client.get(f'/login/authorized?code=noauth&state={app.secret_key}', follow_redirects=True)
         self.assertTrue('Access denied' in str(response.data))
 
-    @mock.patch('requests.post', side_effect=mocked_requests_post)
+    @mock.patch('requests.post', side_effect=mocked_requests)
     def test_twitch_token_set(self, mock_post):
         self.client.get(f'/login/authorized?state={app.secret_key}&code=abc123')
         with self.client.session_transaction() as session:
             self.assertTrue('twitch_token' in session)
 
-    def test_logout(self):
+    @mock.patch('requests.get', side_effect=mocked_requests)
+    def test_logout(self, mock_get):
+        with self.client.session_transaction() as session:
+            session['twitch_token'] = 'abc123'
+        self.client.get('/logout', follow_redirects=True)
+        with self.client.session_transaction() as session:
+            self.assertFalse('twitch_token' in session)
+
+    @mock.patch('requests.get', side_effect=mocked_requests)
+    def test_validate_token(self, mock_get):
         with self.client.session_transaction() as session:
             session['twitch_token'] = 'abc123'
         self.client.get('/')
         with self.client.session_transaction() as session:
             self.assertTrue('twitch_token' in session)
-        self.client.get('/logout', follow_redirects=True)
+
+    def test_invalid_token(self):
+        with self.client.session_transaction() as session:
+            session['twitch_token'] = 'bad_token'
+        self.client.get('/')
         with self.client.session_transaction() as session:
             self.assertFalse('twitch_token' in session)
 

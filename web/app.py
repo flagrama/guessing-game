@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_talisman import Talisman
-from .blueprints.main import main
-from .blueprints.authentication import authentication
+from web.blueprints.main import main
+from web.blueprints.authentication import authentication
 
 
 def create_app(config='dev'):
