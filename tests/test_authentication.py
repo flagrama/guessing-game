@@ -26,10 +26,15 @@ class LoginRedirectTest(TestCase):
             def text(self):
                 return self.text
 
+            def status_code(self):
+                return self.status_code
+
         if 'noauth' in args[0]:
             return None
-        if '/token' in args[0]:
-            return MockResponse("""{"access_token": "abc123"}""", 200)
+        if '/token' in args[0] and 'grant_type=authorization_code' in args[0]:
+            return MockResponse("""{"access_token": "abc123", "refresh_token": "def456"}""", 200)
+        if '/token' in args[0] and 'grant_type=refresh_token' in args[0]:
+            return MockResponse("""{"access_token": "ghi789", "refresh_token": "jkl000"}""", 200)
         if '/validate' in args[0]:
             return MockResponse(None, 200)
         if '/revoke' in args[0]:

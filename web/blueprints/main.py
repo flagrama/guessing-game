@@ -2,7 +2,7 @@ from flask import (
     Blueprint, render_template, session
 )
 
-from web.twitch import Twitch
+import web.twitch as twitch
 
 main = Blueprint('main', __name__)
 
@@ -15,5 +15,5 @@ def hello():
 @main.before_request
 def validate_token():
     if 'twitch_token' in session:
-        if not Twitch().validate_token(session['twitch_token']):
+        if not twitch.validate_token(session['twitch_token']):
             session.pop('twitch_token')
