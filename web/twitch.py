@@ -1,5 +1,6 @@
 import json
 import requests
+from urllib.parse import quote
 
 import web.config as config
 
@@ -40,3 +41,14 @@ def revoke_token(token):
     requests.post(twitch_base + '/revoke'
                   + f"?client_id={config.TWITCH_CLIENT_ID}"
                   + f"&token={token}")
+
+
+def refresh_token(token_refresh_token):
+    response = requests.post(twitch_base + '/token'
+                             + f"?grant_type=refresh_token"
+                             + f"&refresh_token={quote(token_refresh_token)}"
+                             + f"&client_id={config.TWITCH_CLIENT_ID}"
+                             + f"&client_secret={config.TWITCH_SECRET}")
+    if response is None:
+        return None
+    return json.loads(response.text)

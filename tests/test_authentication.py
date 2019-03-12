@@ -19,9 +19,10 @@ class LoginRedirectTest(TestCase):
     # This method will be used by the mock to replace requests.get
     def mocked_requests(*args, **kwargs):
         class MockResponse:
-            def __init__(self, text, status_code):
+            def __init__(self, text, status_code, headers=None):
                 self.text = text
                 self.status_code = status_code
+                self.headers = headers
 
             def text(self):
                 return self.text
@@ -29,8 +30,17 @@ class LoginRedirectTest(TestCase):
             def status_code(self):
                 return self.status_code
 
+            def headers(self):
+                return self.headers
+
         if 'noauth' in args[0]:
             return None
+        if 'badapicall' in args[0]:
+            return MockResponse("""{"error": "Unauthorized","""
+                                + """ "message": "Token invalid or missing required scope","""
+                                  + """"status": 401}""",
+                                401,
+                                """{"www-authenticate": "OAuth realm='TwitchTV', error='invalid_token'"}""")
         if '/token' in args[0] and 'grant_type=authorization_code' in args[0]:
             return MockResponse("""{"access_token": "abc123", "refresh_token": "def456"}""", 200)
         if '/token' in args[0] and 'grant_type=refresh_token' in args[0]:
@@ -87,9 +97,21 @@ class LoginRedirectTest(TestCase):
     def test_invalid_token(self):
         with self.client.session_transaction() as session:
             session['twitch_token'] = 'bad_token'
+            session['twitch_refresh_token'] = 'bad_token'
         self.client.get('/')
         with self.client.session_transaction() as session:
             self.assertFalse('twitch_token' in session)
+
+    # @mock.patch('requests.get', side_effect=mocked_requests)
+    # @mock.patch('requests.post', side_effect=mocked_requests)
+    # def test_refresh_token(self, mock_get, mock_post):
+    #     with self.client.session_transaction() as session:
+    #         session['twitch_token'] = 'abc123'
+    #         session['twitch_refresh_token'] = 'def456'
+    #     self.client.get('/')
+    #     with self.client.session_transaction() as session:
+    #         self.assertFalse(session['twitch_token'] == 'abc123')
+    #         self.assertFalse(session['twitch_refresh_token'] == 'def456')
 
 
 if __name__ == '__main__':
