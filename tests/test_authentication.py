@@ -47,6 +47,7 @@ class LoginRedirectTest(TestCase):
     def test_logout(self, mock_get, mock_post):
         with self.client.session_transaction() as session:
             session['twitch_token'] = 'abc123'
+            session['twitch_refresh_token'] = "def456"
         self.client.get('/logout', follow_redirects=True)
         with self.client.session_transaction() as session:
             self.assertFalse('twitch_token' in session)
@@ -55,10 +56,10 @@ class LoginRedirectTest(TestCase):
     def test_validate_token(self, mock_get):
         with self.client.session_transaction() as session:
             session['twitch_token'] = 'abc123'
+            session['twitch_refresh_token'] = "def456"
         self.client.get('/')
         with self.client.session_transaction() as session:
             self.assertTrue('twitch_token' in session)
-            self.assertTrue('twitch_login' in session)
 
     def test_invalid_token(self):
         with self.client.session_transaction() as session:
@@ -67,17 +68,6 @@ class LoginRedirectTest(TestCase):
         self.client.get('/')
         with self.client.session_transaction() as session:
             self.assertFalse('twitch_token' in session)
-
-    # @mock.patch('requests.get', side_effect=mocked_requests)
-    # @mock.patch('requests.post', side_effect=mocked_requests)
-    # def test_refresh_token(self, mock_get, mock_post):
-    #     with self.client.session_transaction() as session:
-    #         session['twitch_token'] = 'abc123'
-    #         session['twitch_refresh_token'] = 'def456'
-    #     self.client.get('/')
-    #     with self.client.session_transaction() as session:
-    #         self.assertFalse(session['twitch_token'] == 'abc123')
-    #         self.assertFalse(session['twitch_refresh_token'] == 'def456')
 
 
 if __name__ == '__main__':

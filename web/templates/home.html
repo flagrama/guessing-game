@@ -18,17 +18,20 @@
     <h1>Guessing Game</h1>
     <ul>
         <li>
-            {% if session['twitch_token'] %}
-            <h1>Hello, {{ session['twitch_login'] }}</h1>
-            <p>{{ session['twitch_token'] }}</p>
-            <p>{{ session['twitch_refresh_token'] }}</p>
-            <button id="logout">
-                <a href="{{ url_for('authentication.logout') }}">Log Out</a>
-            </button>
+            {% if session['twitch_display_name'] %}
+                {% set user_display_name = session['twitch_display_name'] %}
             {% else %}
-            <button id="login_with_twitch">
-                <a href="{{ url_for('authentication.login') }}">Log In with Twitch</a>
-            </button>
+                {% set user_display_name = session['twitch_login'] %}
+            {% endif %}
+            {% if session['twitch_token'] %}
+                <h1>Hello, {{ user_display_name }}</h1>
+                <button id="logout">
+                    <a href="{{ url_for('authentication.logout') }}">Log Out</a>
+                </button>
+            {% else %}
+                <button id="login_with_twitch">
+                    <a href="{{ url_for('authentication.login') }}">Log In with Twitch</a>
+                </button>
             {% endif %}
         </li>
     </ul>

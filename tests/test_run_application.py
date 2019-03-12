@@ -6,7 +6,7 @@ from web.app import create_app
 import web.wsgi
 
 
-class HomePageTest(TestCase):
+class RunApplicationTest(TestCase):
 
     def create_app(self):
         return create_app()
