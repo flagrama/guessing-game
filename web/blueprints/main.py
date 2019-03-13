@@ -8,7 +8,7 @@ main = Blueprint('main', __name__)
 
 
 @main.route('/')
-def hello():
+def index():
     if 'twitch_display_name' not in session and 'twitch_token' in session:
         new_token, new_refresh_token, user = (
             twitch.get_users(
