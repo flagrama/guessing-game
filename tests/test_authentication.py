@@ -16,12 +16,15 @@ class LoginRedirectTest(TestCase):
 
     def create_app(self):
         application = create_app('web.config.TestingConfig')
-        application.config["DATABASE_URL"] = "sqlite://"
         db.init_app(application)
         db.create_all(app=application)
         application.app_context().push()
         self.client = application.test_client()
         return application
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
 
     def test_login_button_navigates_to_twitch(self):
         response = self.client.get('/login')
@@ -85,7 +88,7 @@ class LoginRedirectTest(TestCase):
             self.assertFalse('twitch_token' in session)
 
     def test_user_repr(self):
-        self.assertTrue('2' in user.__repr__())
+        self.assertTrue('1' in user.__repr__())
         self.assertTrue('test_user' in user.__repr__())
 
 

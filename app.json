@@ -7,7 +7,6 @@
             "env": {
                 "APP_SETTINGS": "web.config.TestingConfig",
                 "SECRET_KEY": "development",
-                "DATABASE_URL": "sqlite:///app.db",
                 "FLASK_APP": "web.wsgi.py"
             },
             "scripts": {

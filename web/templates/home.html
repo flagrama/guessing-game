@@ -18,7 +18,6 @@
     <h1>Guessing Game</h1>
     <ul>
         <li>
-            <p>{{  session }}</p>
             {% if session['twitch_token'] %}
                 <h1>Hello, {{ user.twitch_display_name }}</h1>
                 <button id="logout">
