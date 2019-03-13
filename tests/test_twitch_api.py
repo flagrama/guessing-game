@@ -3,15 +3,14 @@ from unittest import mock
 
 from flask_testing import TestCase
 
-from web.app import create_app
+from web import create_app
 from tests.mocks import mocked_requests
 
 
 class TwitchApiTest(TestCase):
 
     def create_app(self):
-        config_name = 'testing'
-        app = create_app(config_name)
+        app = create_app()
         self.client = app.test_client()
         return app
 

@@ -5,15 +5,14 @@ from urllib import parse
 from flask import current_app as app
 from flask_testing import TestCase
 
-from web.app import create_app
+from web import create_app
 from tests.mocks import mocked_requests
 
 
 class LoginRedirectTest(TestCase):
 
     def create_app(self):
-        config_name = 'testing'
-        app = create_app(config_name)
+        app = create_app()
         self.client = app.test_client()
         return app
 
