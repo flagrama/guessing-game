@@ -11,7 +11,10 @@ main = Blueprint('main', __name__)
 def hello():
     if 'twitch_display_name' not in session and 'twitch_token' in session:
         new_token, new_refresh_token, user = (
-            twitch.get_users(session['twitch_token'], session['twitch_refresh_token'], session['twitch_login'])
+            twitch.get_users(
+                session['twitch_token'],
+                session['twitch_refresh_token'],
+                session['twitch_login'])
         )
         if new_token and new_token != session['twitch_token']:
             session['twitch_token'] = new_token

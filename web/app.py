@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask
 from flask_talisman import Talisman
 from web.blueprints.main import main
@@ -6,11 +8,10 @@ from web.blueprints.authentication import authentication
 
 def create_app(config='dev'):
     app = Flask(__name__)
-    if not config == 'testing':
-        Talisman(app)
+    Talisman(app)
+    app.config.from_object(os.environ['APP_SETTINGS'])
     app.register_blueprint(main)
     app.register_blueprint(authentication)
-    app.secret_key = 'development'
 
     return app
 

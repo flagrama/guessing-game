@@ -2,7 +2,7 @@ import json
 import requests
 from urllib.parse import quote
 
-import web.config as config
+from flask import current_app as app
 
 
 twitch_auth_base = "https://id.twitch.tv/oauth2"
@@ -12,7 +12,7 @@ scope = "user_read"
 
 def authorize(redirect_uri, state):
     return (twitch_auth_base + '/authorize'
-            + f"?client_id={config.TWITCH_CLIENT_ID}"
+            + f"?client_id={app.config['TWITCH_CLIENT_ID']}"
             + f"&redirect_uri={redirect_uri}"
             + f"&response_type=code"
             + f"&scope={scope}"
@@ -21,8 +21,8 @@ def authorize(redirect_uri, state):
 
 def create_token(authorization_code, redirect_uri):
     response = requests.post(twitch_auth_base + '/token'
-                             + f"?client_id={config.TWITCH_CLIENT_ID}"
-                             + f"&client_secret={config.TWITCH_SECRET}"
+                             + f"?client_id={app.config['TWITCH_CLIENT_ID']}"
+                             + f"&client_secret={app.config['TWITCH_SECRET']}"
                              + f"&code={authorization_code}"
                              + f"&grant_type=authorization_code"
                              + f"&redirect_uri={redirect_uri}")
@@ -40,7 +40,7 @@ def validate_token(token):
 
 def revoke_token(token):
     requests.post(twitch_auth_base + '/revoke'
-                  + f"?client_id={config.TWITCH_CLIENT_ID}"
+                  + f"?client_id={app.config['TWITCH_CLIENT_ID']}"
                   + f"&token={token}")
 
 
@@ -48,8 +48,8 @@ def refresh_token(token_refresh_token):
     response = requests.post(twitch_auth_base + '/token'
                              + f"?grant_type=refresh_token"
                              + f"&refresh_token={quote(token_refresh_token)}"
-                             + f"&client_id={config.TWITCH_CLIENT_ID}"
-                             + f"&client_secret={config.TWITCH_SECRET}")
+                             + f"&client_id={app.config['TWITCH_CLIENT_ID']}"
+                             + f"&client_secret={app.config['TWITCH_SECRET']}")
     if response is None:
         return None, None
     refresh_json = json.loads(response.text)
