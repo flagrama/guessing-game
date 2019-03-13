@@ -21,7 +21,6 @@ def mocked_requests(*args, **kwargs):
             and 'Authorization' in kwargs['headers']
             and 'apiserverisdown' in kwargs['headers']['Authorization']):
         return None
-        return None
     if ('/users' in args[0]
             and 'headers' in kwargs
             and 'Authorization' in kwargs['headers']
@@ -33,15 +32,31 @@ def mocked_requests(*args, **kwargs):
                             """{"www-authenticate": "OAuth realm='TwitchTV', error='invalid_token'"}""")
     if '/token' in args[0] and 'grant_type=refresh_token' in args[0] and 'refreshserverisdown' in args[0]:
         return None
+    if '/token' in args[0] and 'grant_type=authorization_code' in args[0] and 'empty_users' in args[0]:
+        return MockResponse("""{"access_token": "empty_users", "refresh_token": "empty_users"}""", 200)
+    if '/token' in args[0] and 'grant_type=authorization_code' in args[0] and 'refreshserverisdown' in args[0]:
+        return MockResponse("""{"access_token": "badapicall", "refresh_token": "refreshserverisdown"}""", 200)
+    if '/token' in args[0] and 'grant_type=authorization_code' in args[0] and 'badapicall' in args[0]:
+        return MockResponse("""{"access_token": "badapicall", "refresh_token": "def456"}""", 200)
     if '/token' in args[0] and 'grant_type=authorization_code' in args[0]:
         return MockResponse("""{"access_token": "abc123", "refresh_token": "def456"}""", 200)
     if '/token' in args[0] and 'grant_type=refresh_token' in args[0]:
         return MockResponse("""{"access_token": "abc123", "refresh_token": "ghi789"}""", 200)
+    if (
+        '/validate' in args[0]
+        and 'headers' in kwargs
+        and 'Authorization' in kwargs['headers']
+        and 'empty_users' in kwargs['headers']['Authorization']
+    ):
+        return MockResponse('{"client_id":"a1b2c3d4ef","login":"empty_users",'
+                            + '"scopes":["user_read"],"user_id":"1000"}', 200)
     if '/validate' in args[0]:
         return MockResponse('{"client_id":"a1b2c3d4ef","login":"test_user",'
                             + '"scopes":["user_read"],"user_id":"1000"}', 200)
     if '/revoke' in args[0]:
         return MockResponse(None, 200)
+    if '/users' in args[0] and 'empty_users' in args[0]:
+        return None
     if '/users' in args[0]:
         return MockResponse('{"data": [{"id": "44322889","login": "dallas","display_name": "dallas","type": "staff",'
                             '"broadcaster_type": "","description": "Just a gamer playing games and chatting. :)",'

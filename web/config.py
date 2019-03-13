@@ -9,6 +9,8 @@ class Config(object):
     SECRET_KEY = os.environ['SECRET_KEY']
     TWITCH_CLIENT_ID = os.environ['TWITCH_CLIENT_ID']
     TWITCH_SECRET = os.environ['TWITCH_SECRET']
+    DATABASE_URL = (os.environ.get('DATABASE_URL')
+                    or 'sqlite:///' + os.path.join(basedir, 'app.db'))
 
 
 class ProductionConfig(Config):
@@ -27,3 +29,4 @@ class DevelopmentConfig(Config):
 
 class TestingConfig(Config):
     TESTING = True
+    DATABASE_URL = 'sqlite:///' + os.path.join(basedir, 'app.db')

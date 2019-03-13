@@ -5,16 +5,23 @@ from urllib import parse
 from flask import current_app as app
 from flask_testing import TestCase
 
-from web import create_app
+from web import create_app, db
+from web.models import User
 from tests.mocks import mocked_requests
+
+user = User(1000, "test_user", "test_user")
 
 
 class LoginRedirectTest(TestCase):
 
     def create_app(self):
-        app = create_app()
-        self.client = app.test_client()
-        return app
+        application = create_app('web.config.TestingConfig')
+        application.config["DATABASE_URL"] = "sqlite://"
+        db.init_app(application)
+        db.create_all(app=application)
+        application.app_context().push()
+        self.client = application.test_client()
+        return application
 
     def test_login_button_navigates_to_twitch(self):
         response = self.client.get('/login')
@@ -35,8 +42,17 @@ class LoginRedirectTest(TestCase):
         response = self.client.get(f'/login/authorized?code=noauth&state={app.secret_key}', follow_redirects=True)
         self.assertTrue('Access denied' in str(response.data))
 
+    @mock.patch('requests.get', side_effect=mocked_requests)
     @mock.patch('requests.post', side_effect=mocked_requests)
-    def test_twitch_token_set(self, mock_post):
+    def test_login(self, mock_get, mock_post):
+        response = self.client.get(f'/login/authorized?code=abc123&state={app.secret_key}', follow_redirects=True)
+        self.assertTrue('dallas' in str(response.data))
+
+    @mock.patch('requests.get', side_effect=mocked_requests)
+    @mock.patch('requests.post', side_effect=mocked_requests)
+    def test_twitch_token_set(self, mock_get, mock_post):
+        db.session.add(user)
+        db.session.commit()
         self.client.get(f'/login/authorized?state={app.secret_key}&code=abc123')
         with self.client.session_transaction() as session:
             self.assertTrue('twitch_token' in session)
@@ -67,6 +83,10 @@ class LoginRedirectTest(TestCase):
         self.client.get('/')
         with self.client.session_transaction() as session:
             self.assertFalse('twitch_token' in session)
+
+    def test_user_repr(self):
+        self.assertTrue('2' in user.__repr__())
+        self.assertTrue('test_user' in user.__repr__())
 
 
 if __name__ == '__main__':

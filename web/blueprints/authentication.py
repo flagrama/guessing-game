@@ -3,7 +3,9 @@ from flask import (
 )
 from flask import current_app as app
 
+from web import db
 import web.twitch as twitch
+from web.models import User
 
 authentication = Blueprint('authentication', __name__)
 
@@ -23,17 +25,44 @@ def authorized():
         flash('Access denied')
         return redirect('/')
     if authorization_code:
-        json = twitch.create_token(authorization_code, redirect_uri)
-        if json is None:
+        create_json = twitch.create_token(authorization_code, redirect_uri)
+        if create_json is None:
             flash('Access denied')
         else:
-            session['twitch_token'] = (json['access_token'])
-            session['twitch_refresh_token'] = (json['refresh_token'])
+            session['twitch_token'] = (create_json['access_token'])
+            session['twitch_refresh_token'] = (create_json['refresh_token'])
+            result = __login_user(session['twitch_token'], session['twitch_refresh_token'] )
+            if not result:
+                twitch.revoke_token(create_json['access_token'])
+                session.clear()
     return redirect('/')
 
 
 @authentication.route('/logout')
 def logout():
     twitch.revoke_token(session.pop('twitch_token', None))
-    session.pop('twitch_refresh_token', None)
+    session.clear()
     return redirect('/')
+
+
+def __login_user(token, refresh_token):
+    validation_json = twitch.validate_token(token)
+    new_token, new_refresh_token, user = (
+        twitch.get_users(token, refresh_token, validation_json['login']))
+    if new_token and new_token != token:
+        session['twitch_token'] = new_token
+    if new_refresh_token and new_refresh_token != refresh_token:
+        session['twitch_refresh_token'] = new_refresh_token
+    if user:
+        session['twitch_user_id'] = (validation_json['user_id'])
+        if User.get_user_by_twitch_id(session['twitch_user_id']):
+            return True
+        user = User(
+            session['twitch_user_id'],
+            validation_json['login'],
+            user['data'][0]['display_name']
+        )
+        db.session.add(user)
+        db.session.commit()
+        return True
+    return False

@@ -18,13 +18,9 @@
     <h1>Guessing Game</h1>
     <ul>
         <li>
-            {% if session['twitch_display_name'] %}
-                {% set user_display_name = session['twitch_display_name'] %}
-            {% else %}
-                {% set user_display_name = session['twitch_login'] %}
-            {% endif %}
+            <p>{{  session }}</p>
             {% if session['twitch_token'] %}
-                <h1>Hello, {{ user_display_name }}</h1>
+                <h1>Hello, {{ user.twitch_display_name }}</h1>
                 <button id="logout">
                     <a href="{{ url_for('authentication.logout') }}">Log Out</a>
                 </button>
