@@ -1,4 +1,6 @@
 import os
+
+import redis
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
@@ -10,6 +12,8 @@ class Config(object):
     TWITCH_CLIENT_ID = os.environ['TWITCH_CLIENT_ID']
     TWITCH_SECRET = os.environ['TWITCH_SECRET']
     SQLALCHEMY_DATABASE_URI = DATABASE_URL = os.environ.get('DATABASE_URL')
+
+    REDIS = redis.Redis.from_url(os.environ.get('REDIS_URL'))
 
 
 class ProductionConfig(Config):

@@ -68,8 +68,9 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         for user in users:
             connection.join(f'#{user}')
 
-
     def handle_messages(self, channel, data):
+        data = data.decode('utf-8')
+
         if 'JOIN' in data[:4]:
             self.connection.join(f'#{data[5:]}')
         if 'PART' in data[:4]:

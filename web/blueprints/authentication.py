@@ -31,7 +31,7 @@ def authorized():
         else:
             session['twitch_token'] = (create_json['access_token'])
             session['twitch_refresh_token'] = (create_json['refresh_token'])
-            result = __login_user(session['twitch_token'], session['twitch_refresh_token'] )
+            result = __login_user(session['twitch_token'], session['twitch_refresh_token'])
             if not result:
                 twitch.revoke_token(create_json['access_token'])
                 session.clear()
@@ -47,8 +47,9 @@ def logout():
 
 def __login_user(token, refresh_token):
     validation_json = twitch.validate_token(token)
+    twitch_login = validation_json['login']
     new_token, new_refresh_token, user = (
-        twitch.get_users(token, refresh_token, validation_json['login']))
+        twitch.get_users(token, refresh_token, twitch_login))
     if new_token and new_token != token:
         session['twitch_token'] = new_token
     if new_refresh_token and new_refresh_token != refresh_token:
@@ -59,10 +60,12 @@ def __login_user(token, refresh_token):
             return True
         user = User(
             session['twitch_user_id'],
-            validation_json['login'],
+            twitch_login,
             user['data'][0]['display_name']
         )
         db.session.add(user)
         db.session.commit()
+        message = f'JOIN {twitch_login}'
+        app.config['REDIS'].publish('standard_bot', message)
         return True
     return False
