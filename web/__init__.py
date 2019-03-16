@@ -1,5 +1,3 @@
-import os
-
 from flask import Flask
 from flask_talisman import Talisman
 from flask_sqlalchemy import SQLAlchemy
@@ -7,6 +5,8 @@ from flask_migrate import Migrate
 
 db = SQLAlchemy()
 migrate = Migrate()
+
+from twitch_bot import TwitchBotThread
 
 
 def create_app(config):
@@ -21,6 +21,11 @@ def create_app(config):
     application.register_blueprint(main)
     from web.blueprints.authentication import authentication
     application.register_blueprint(authentication)
+
+    # Launch standard_bot
+    if not application.config['MIGRATIONS']:
+        standard_bot = TwitchBotThread(application.config['TWITCH_BOT_USERNAME'], application.config['TWITCH_BOT_TOKEN'])
+        standard_bot.start()
 
     return application
 

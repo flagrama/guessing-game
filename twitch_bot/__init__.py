@@ -7,6 +7,17 @@ import irc.bot
 import psycopg2
 
 
+class TwitchBotThread(threading.Thread):
+    def __init__(self, username, token):
+        threading.Thread.__init__(self, daemon=True)
+        self.username = username
+        self.token = token
+
+    def run(self):
+        bot = TwitchBot(self.username, self.token)
+        bot.start()
+
+
 class Listener(threading.Thread):
     def __init__(self, callback, redis, channels):
         threading.Thread.__init__(self)
@@ -25,10 +36,8 @@ class Listener(threading.Thread):
 
 
 class TwitchBot(irc.bot.SingleServerIRCBot):
-    def __init__(self):
+    def __init__(self, username, token):
         self.client_id = os.environ.get('TWITCH_BOT_CLIENT_ID')
-        self.token = os.environ.get('TWITCH_BOT_TOKEN')
-        self.username = os.environ.get('TWITCH_BOT_USERNAME')
 
         redis_server = redis.Redis.from_url(os.environ.get('REDIS_URL'))
         message_handler = Listener(self.handle_messages, redis_server, ['standard_bot'])
@@ -37,12 +46,33 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         port = 6667
 
         irc.bot.SingleServerIRCBot.__init__(
-            self, [(server, port, self.token)], self.username, self.username
+            self, [(server, port, token)], username, username
         )
 
         message_handler.start()
 
     def on_welcome(self, connection, event):
+        connection.cap('REQ', ':twitch.tv/membership')
+        connection.cap('REQ', ':twitch.tv/tags')
+        connection.cap('REQ', ':twitch.tv/commands')
+
+        users = [x[0] for x in self.__execute_sql("SELECT twitch_login_name FROM users")]
+        for user in users:
+            connection.join(f'#{user}')
+            connection.privmsg(f'#{user}', 'Hello, World!')
+
+    def handle_messages(self, channel, data):
+        data = data.decode('utf-8')
+
+        if 'JOIN' in data[:4]:
+            self.connection.join(f'#{data[5:]}')
+            self.connection.privmsg(f'#{data[5:]}', f'Welcome, {data[5:]}! Thanks for using the Guessing Game.')
+        if 'PART' in data[:4]:
+            self.connection.privmsg(f'#{data[5:]}', f'See you soon {data[5:]}.')
+            self.connection.part(f'#{data[5:]}')
+
+    @staticmethod
+    def __execute_sql(sql):
         url = urlparse.urlparse(os.environ['DATABASE_URL'])
         dbname = url.path[1:]
         user = url.username
@@ -58,25 +88,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
             port=port
         )
         cursor = con.cursor()
-        cursor.execute("SELECT twitch_login_name FROM users")
-        users = cursor.fetchall()
-
-        connection.cap('REQ', ':twitch.tv/membership')
-        connection.cap('REQ', ':twitch.tv/tags')
-        connection.cap('REQ', ':twitch.tv/commands')
-
-        for user in users:
-            connection.join(f'#{user}')
-
-    def handle_messages(self, channel, data):
-        data = data.decode('utf-8')
-
-        if 'JOIN' in data[:4]:
-            self.connection.join(f'#{data[5:]}')
-        if 'PART' in data[:4]:
-            self.connection.part(f'#{data[5:]}')
-
-
-if __name__ == "__main__":
-    bot = TwitchBot()
-    bot.start()
+        cursor.execute(sql)
+        data = cursor.fetchall()
+        con.close()
+        return data

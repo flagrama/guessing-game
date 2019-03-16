@@ -5,6 +5,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config(object):
+    MIGRATIONS = False
     DEBUG = False
     TESTING = False
     DEVELOPMENT = False
@@ -14,6 +15,8 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = DATABASE_URL = os.environ.get('DATABASE_URL')
 
     REDIS = redis.Redis.from_url(os.environ.get('REDIS_URL'))
+    TWITCH_BOT_USERNAME = os.environ.get('TWITCH_BOT_USERNAME')
+    TWITCH_BOT_TOKEN = os.environ.get('TWITCH_BOT_TOKEN')
 
 
 class ProductionConfig(Config):
@@ -33,3 +36,7 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = DATABASE_URL = 'sqlite:///:memory:'
+
+
+class MigrationsConfig(Config):
+    MIGRATIONS = True
