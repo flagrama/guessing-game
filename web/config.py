@@ -5,7 +5,6 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config(object):
-    MIGRATIONS = False
     DEBUG = False
     TESTING = False
     DEVELOPMENT = False
@@ -36,7 +35,3 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = DATABASE_URL = 'sqlite:///:memory:'
-
-
-class MigrationsConfig(Config):
-    MIGRATIONS = True

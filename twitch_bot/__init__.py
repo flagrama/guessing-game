@@ -20,7 +20,7 @@ class TwitchBotThread(threading.Thread):
 
 class Listener(threading.Thread):
     def __init__(self, callback, redis, channels):
-        threading.Thread.__init__(self)
+        threading.Thread.__init__(self, daemon=True)
         if isinstance(channels, str):
             channels = [channels]
         self.callback = callback
@@ -92,3 +92,8 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         data = cursor.fetchall()
         con.close()
         return data
+
+if __name__ == "__main__":
+    standard_bot = TwitchBot(os.environ.get('TWITCH_BOT_USERNAME'),
+                                   os.environ.get('TWITCH_BOT_TOKEN'))
+    standard_bot.start()

@@ -22,11 +22,6 @@ def create_app(config):
     from web.blueprints.authentication import authentication
     application.register_blueprint(authentication)
 
-    # Launch standard_bot
-    if not application.config['MIGRATIONS']:
-        standard_bot = TwitchBotThread(application.config['TWITCH_BOT_USERNAME'], application.config['TWITCH_BOT_TOKEN'])
-        standard_bot.start()
-
     return application
 
 
