@@ -56,7 +56,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         connection.cap('REQ', ':twitch.tv/tags')
         connection.cap('REQ', ':twitch.tv/commands')
 
-        users = [x[0] for x in self.__execute_sql("SELECT twitch_login_name FROM users")]
+        users = [x[0] for x in self.__execute_sql("SELECT twitch_login_name FROM users WHERE bot_enabled IS TRUE")]
         for user in users:
             connection.join(f'#{user}')
             connection.privmsg(f'#{user}', 'Hello, World!')

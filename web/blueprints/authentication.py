@@ -48,24 +48,27 @@ def logout():
 def __login_user(token, refresh_token):
     validation_json = twitch.validate_token(token)
     twitch_login = validation_json['login']
-    new_token, new_refresh_token, user = (
+    new_token, new_refresh_token, twitch_user = (
         twitch.get_users(token, refresh_token, twitch_login))
     if new_token and new_token != token:
         session['twitch_token'] = new_token
     if new_refresh_token and new_refresh_token != refresh_token:
         session['twitch_refresh_token'] = new_refresh_token
-    if user:
+    if twitch_user:
         session['twitch_user_id'] = (validation_json['user_id'])
-        if User.get_user_by_twitch_id(session['twitch_user_id']):
+        # Attempt to find a user associated with the returned twitch user id
+        user = User.get_user_by_twitch_id(session['twitch_user_id'])
+        if user:
+            session['current_user'] = user.get_id()
             return True
+        # Create User in database since we couldn't find an existing account associated with this twitch user id
         user = User(
             session['twitch_user_id'],
             twitch_login,
-            user['data'][0]['display_name']
+            twitch_user['data'][0]['display_name']
         )
         db.session.add(user)
         db.session.commit()
-        message = f'JOIN {twitch_login}'
-        app.config['REDIS'].publish('standard_bot', message)
+        session['current_user'] = user.get_id()
         return True
     return False

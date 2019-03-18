@@ -18,7 +18,7 @@
     <h1>Guessing Game</h1>
     <ul>
         <li>
-            {% if session['twitch_token'] %}
+            {% if user %}
                 <h1>Hello, {{ user.twitch_display_name }}</h1>
                 <button id="logout">
                     <a href="{{ url_for('authentication.logout') }}">Log Out</a>
@@ -31,5 +31,12 @@
         </li>
     </ul>
 </nav>
+{% if user %}
+    {% set bot_status = user.get_bot_enabled() %}
+    <content>
+        <p>The bot is currently <span id="bot_{{ 'enabled' if bot_status else 'disabled' }}">{{ 'Enabled' if bot_session else 'Disabled' }}</span></p>
+        <p><a href="{{ url_for('bot.change_status') }}">Click here to {{ 'Disable' if bot_status else 'Enable' }}</a> the bot</p>
+    </content>
+{% endif %}
 </body>
 </html>

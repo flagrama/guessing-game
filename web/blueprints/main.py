@@ -1,5 +1,5 @@
 from flask import (
-    Blueprint, render_template, session, redirect, url_for
+    Blueprint, render_template, session
 )
 
 import web.twitch as twitch
@@ -11,10 +11,10 @@ main = Blueprint('main', __name__)
 @main.route('/')
 def index():
     user = None
-    if 'twitch_user_id' in session:
+    if 'current_user' in session:
+        user = User.get_user_by_id(session['current_user'])
+    elif 'twitch_user_id' in session:
         user = User.get_user_by_twitch_id(session['twitch_user_id'])
-        if not user:
-            return redirect(url_for('authentication.logout'))
     return render_template('home.html', user=user)
 
 

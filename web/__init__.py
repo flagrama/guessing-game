@@ -6,8 +6,6 @@ from flask_migrate import Migrate
 db = SQLAlchemy()
 migrate = Migrate()
 
-from twitch_bot import TwitchBotThread
-
 
 def create_app(config):
     application = Flask(__name__)
@@ -21,6 +19,8 @@ def create_app(config):
     application.register_blueprint(main)
     from web.blueprints.authentication import authentication
     application.register_blueprint(authentication)
+    from web.blueprints.bot import bot
+    application.register_blueprint(bot)
 
     return application
 
