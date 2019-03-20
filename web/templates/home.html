@@ -1,42 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Welcome - Guessing Game</title>
-</head>
-<body>
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <ul class=flashes>
-    {% for message in messages %}
-      <li>{{ message }}</li>
-    {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
-<nav>
-    <h1>Guessing Game</h1>
-    <ul>
-        <li>
-            {% if current_user.is_active %}
-                <h1>Hello, {{ current_user.twitch_display_name }}</h1>
-                <button id="logout">
-                    <a href="{{ url_for('authentication.logout') }}">Log Out</a>
-                </button>
-            {% else %}
-                <button id="login_with_twitch">
-                    <a href="{{ url_for('authentication.login') }}">Log In with Twitch</a>
-                </button>
-            {% endif %}
-        </li>
-    </ul>
-</nav>
-{% if current_user.is_active %}
-    {% set bot_status = current_user.get_bot_enabled() %}
-    <content>
-        <p>The bot is currently <span id="bot_{{ 'enabled' if bot_status else 'disabled' }}">{{ 'Enabled' if bot_session else 'Disabled' }}</span></p>
-        <p><a href="{{ url_for('bot.change_status') }}">Click here to {{ 'Disable' if bot_status else 'Enable' }}</a> the bot</p>
-    </content>
-{% endif %}
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}Welcome{% endblock %}
+{% block content %}
+    <h2>Guessing Game</h2>
+    <p>A bot for your Twitch chat to play a guessing game.</p>
+{% endblock %}}

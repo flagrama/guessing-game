@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %} - Guessing Game</title>
+</head>
+<body>
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+<nav>
+    <h1>Guessing Game</h1>
+    <ul>
+        {% if current_user.is_active %}
+            <li>
+                <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+            </li>
+        {% endif %}
+        <li>
+            {% if current_user.is_active %}
+                <button id="logout">
+                    <a href="{{ url_for('authentication.logout') }}">Log Out</a>
+                </button>
+            {% else %}
+                <button id="login_with_twitch">
+                    <a href="{{ url_for('authentication.login') }}">Log In with Twitch</a>
+                </button>
+            {% endif %}
+        </li>
+    </ul>
+</nav>
+<content>
+    {% block content %}{% endblock %}
+</content>
+</body>
+</html>

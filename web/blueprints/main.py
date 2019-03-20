@@ -1,8 +1,7 @@
 from flask import (
-    Blueprint, render_template, session
+    Blueprint, render_template
 )
-
-import web.twitch as twitch
+from flask_login import login_required
 
 main = Blueprint('main', __name__)
 
@@ -12,9 +11,7 @@ def index():
     return render_template('home.html')
 
 
-@main.before_request
-def validate_token():
-    if 'twitch_token' in session:
-        validation_json = twitch.validate_token(session['twitch_token'])
-        if not validation_json:
-            session.clear()
+@main.route('/dashboard')
+@login_required
+def dashboard():
+    return render_template('dashboard.html')

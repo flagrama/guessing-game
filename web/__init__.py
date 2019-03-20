@@ -1,8 +1,10 @@
-from flask import Flask
+from flask import Flask, session
 from flask_login import LoginManager
 from flask_talisman import Talisman
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+
+from web import twitch
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -17,6 +19,7 @@ def create_app(config):
     db.init_app(application)
     migrate.init_app(application, db)
     login_manager.login_view = 'authentication.login'
+    login_manager.login_message = None
     login_manager.init_app(application)
 
     from web.blueprints.main import main
@@ -25,6 +28,13 @@ def create_app(config):
     application.register_blueprint(authentication)
     from web.blueprints.bot import bot
     application.register_blueprint(bot)
+
+    @application.before_request
+    def validate_token():
+        if 'twitch_token' in session:
+            validation_json = twitch.validate_token(session['twitch_token'])
+            if not validation_json:
+                session.clear()
 
     return application
 

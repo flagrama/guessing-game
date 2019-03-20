@@ -15,6 +15,7 @@ authentication = Blueprint('authentication', __name__)
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
+    session['next_url'] = request.args.get('next')
     redirect_uri = url_for('authentication.authorized', _external=True)
     return redirect(twitch.authorize(redirect_uri, app.config['TWITCH_STATE']))
 
@@ -38,7 +39,8 @@ def authorized():
             if not result:
                 twitch.revoke_token(create_json['access_token'])
                 session.clear()
-    return redirect('/')
+    redirect_url = session.pop('next_url') if session['next_url'] else '/'
+    return redirect(redirect_url)
 
 
 @authentication.route('/logout')

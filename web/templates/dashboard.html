@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+    {% if current_user.is_active %}
+        <h2>Hello, {{ current_user.twitch_display_name }}</h2>
+        {% set bot_status = current_user.get_bot_enabled() %}
+            <p>The bot is currently
+                <span id="bot_{{ 'enabled' if bot_status else 'disabled' }}">{{ 'Enabled' if bot_status else 'Disabled' }}</span>
+            </p>
+            <p><a href="{{ url_for('bot.change_status') }}">Click here to {{ 'Disable' if bot_status else 'Enable' }}</a> the bot</p>
+    {% endif %}
+{% endblock %}}
