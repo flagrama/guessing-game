@@ -2,6 +2,7 @@ from flask import (
     Blueprint, url_for, session, redirect, flash, request
 )
 from flask import current_app as app
+from flask_login import current_user, login_user, logout_user
 
 from web import db
 import web.twitch as twitch
@@ -12,8 +13,10 @@ authentication = Blueprint('authentication', __name__)
 
 @authentication.route('/login')
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
     redirect_uri = url_for('authentication.authorized', _external=True)
-    return redirect(twitch.authorize(redirect_uri, app.secret_key))
+    return redirect(twitch.authorize(redirect_uri, app.secret_key)) # FIXME: Change this to not publicly reveal secret_key
 
 
 @authentication.route('/login/authorized')
@@ -40,6 +43,7 @@ def authorized():
 
 @authentication.route('/logout')
 def logout():
+    logout_user()
     twitch.revoke_token(session.pop('twitch_token', None))
     session.clear()
     return redirect('/')
@@ -59,7 +63,7 @@ def __login_user(token, refresh_token):
         # Attempt to find a user associated with the returned twitch user id
         user = User.get_user_by_twitch_id(session['twitch_user_id'])
         if user:
-            session['current_user'] = user.get_id()
+            login_user(user)
             return True
         # Create User in database since we couldn't find an existing account associated with this twitch user id
         user = User(
@@ -69,6 +73,6 @@ def __login_user(token, refresh_token):
         )
         db.session.add(user)
         db.session.commit()
-        session['current_user'] = user.get_id()
+        login_user(user)
         return True
     return False

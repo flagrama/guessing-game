@@ -3,19 +3,13 @@ from flask import (
 )
 
 import web.twitch as twitch
-from web.models import User
 
 main = Blueprint('main', __name__)
 
 
 @main.route('/')
 def index():
-    user = None
-    if 'current_user' in session:
-        user = User.get_user_by_id(session['current_user'])
-    elif 'twitch_user_id' in session:
-        user = User.get_user_by_twitch_id(session['twitch_user_id'])
-    return render_template('home.html', user=user)
+    return render_template('home.html')
 
 
 @main.before_request

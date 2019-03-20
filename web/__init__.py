@@ -1,10 +1,12 @@
 from flask import Flask
+from flask_login import LoginManager
 from flask_talisman import Talisman
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
 db = SQLAlchemy()
 migrate = Migrate()
+login_manager = LoginManager()
 
 
 def create_app(config):
@@ -14,6 +16,8 @@ def create_app(config):
         Talisman(application)
     db.init_app(application)
     migrate.init_app(application, db)
+    login_manager.login_view = 'authentication.login'
+    login_manager.init_app(application)
 
     from web.blueprints.main import main
     application.register_blueprint(main)
@@ -26,3 +30,8 @@ def create_app(config):
 
 
 from web import models
+
+
+@login_manager.user_loader
+def load_user(id):
+    return models.User.query.get(int(id))
