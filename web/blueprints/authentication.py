@@ -16,7 +16,7 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     redirect_uri = url_for('authentication.authorized', _external=True)
-    return redirect(twitch.authorize(redirect_uri, app.secret_key)) # FIXME: Change this to not publicly reveal secret_key
+    return redirect(twitch.authorize(redirect_uri, app.config['TWITCH_STATE']))
 
 
 @authentication.route('/login/authorized')
@@ -24,7 +24,7 @@ def authorized():
     redirect_uri = url_for('authentication.authorized', _external=True)
     authorization_code = request.args.get('code')
     csrf_state = request.args.get('state')
-    if csrf_state != app.secret_key:
+    if csrf_state != app.config['TWITCH_STATE']:
         flash('Access denied')
         return redirect('/')
     if authorization_code:
