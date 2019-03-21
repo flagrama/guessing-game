@@ -28,6 +28,8 @@ def create_app(config):
     application.register_blueprint(authentication)
     from web.blueprints.bot import bot
     application.register_blueprint(bot)
+    from web.blueprints.guessable import guessable
+    application.register_blueprint(guessable, url_prefix="/guessables")
 
     @application.before_request
     def validate_token():
@@ -43,5 +45,5 @@ from web import models
 
 
 @login_manager.user_loader
-def load_user(id):
-    return models.User.query.get(int(id))
+def load_user(user_id):
+    return models.User.query.get(int(user_id))
