@@ -11,6 +11,7 @@ class User(UserMixin, db.Model):
     twitch_login_name = db.Column(db.String)
     twitch_display_name = db.Column(db.String)
     bot_enabled = db.Column(db.Boolean, nullable=False)
+    guessables = db.relationship("Guessable")
 
     def __init__(self, twitch_id, twitch_login_name, twitch_display_name):
         self.twitch_id = twitch_id
@@ -50,6 +51,7 @@ class Guessable(db.Model):
     uuid = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     name = db.Column(db.String)
     variations = db.Column(db.PickleType)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __init__(self, name, variations):
         self.name = name
