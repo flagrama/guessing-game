@@ -1,4 +1,5 @@
 from flask import Flask, session
+from flaskext.csrf import csrf
 from flask_login import LoginManager
 from flask_talisman import Talisman
 from flask_sqlalchemy import SQLAlchemy
@@ -21,6 +22,7 @@ def create_app(config):
     login_manager.login_view = 'authentication.login'
     login_manager.login_message = None
     login_manager.init_app(application)
+    csrf(application)
 
     from web.blueprints.main import main
     application.register_blueprint(main)

@@ -7,6 +7,9 @@
             <p>The bot is currently
                 <span id="bot_{{ 'enabled' if bot_status else 'disabled' }}">{{ 'Enabled' if bot_status else 'Disabled' }}</span>
             </p>
-            <p><a href="{{ url_for('bot.change_status') }}">Click here to {{ 'Disable' if bot_status else 'Enable' }}</a> the bot</p>
+            <form action="{{ url_for('bot.change_status') }}" method="POST">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+                <input type="submit" value="{{ 'Disable' if bot_status else 'Enable' }}" />
+            </form>
     {% endif %}
 {% endblock %}}
