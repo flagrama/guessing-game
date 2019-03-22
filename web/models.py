@@ -34,12 +34,16 @@ class User(UserMixin, db.Model):
         return self.bot_enabled
 
     @staticmethod
+    def get_guessables(user_id):
+        return User.query.filter_by(id=user_id).with_entities(User.guessables).limit(30).all()
+
+    @staticmethod
     def get_user_by_twitch_id(twitch_id):
         return User.query.filter_by(twitch_id=twitch_id).first()
 
     @staticmethod
-    def get_user_by_id(id):
-        return User.query.filter_by(id=id).first()
+    def get_user_by_id(user_id):
+        return User.query.filter_by(id=user_id).first()
 
 
 class Guessable(db.Model):

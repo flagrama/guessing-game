@@ -20,6 +20,9 @@
         {% if current_user.is_active %}
             <li>
                 <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+                <ul>
+                    <li><a href="{{ url_for('guessable.index') }}">Guessables</a></li>
+                </ul>
             </li>
         {% endif %}
         <li>

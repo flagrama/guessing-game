@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block title %}{% block action %}{% endblock %} Guessables{% endblock %}
+{% block content %}
+    <form method="POST">
+        <h2>{{ self.action() }} Guessable</h2>
+    {% block action_content %}{% endblock %}
+    </form>
+{% endblock %}}
