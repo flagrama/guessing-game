@@ -1,8 +1,13 @@
 {% extends 'base.html' %}
 {% block title %}{% block action %}{% endblock %} Guessables{% endblock %}
 {% block content %}
-    <form method="POST">
+    <form method="post">
         <h2>{{ self.action() }} Guessable</h2>
+        {% if errors %}
+            {% for error in errors %}
+                <p class="error">{{ error }}</p>
+            {% endfor %}
+        {% endif %}
     {% block action_content %}{% endblock %}
     </form>
 {% endblock %}}

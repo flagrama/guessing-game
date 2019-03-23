@@ -2,7 +2,7 @@ from flask import (
     Blueprint, redirect, url_for
 )
 from flask import current_app as app
-from flask_login import current_user
+from flask_login import current_user, login_required
 
 
 bot = Blueprint('bot', __name__)
@@ -16,3 +16,9 @@ def change_status():
         message = f'JOIN {current_user.twitch_login_name}'
     app.config['REDIS'].publish('standard_bot', message)
     return redirect(url_for('main.dashboard'))
+
+
+@bot.before_request
+@login_required
+def login_check():
+    pass

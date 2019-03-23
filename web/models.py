@@ -34,10 +34,6 @@ class User(UserMixin, db.Model):
         return self.bot_enabled
 
     @staticmethod
-    def get_guessables(user_id):
-        return User.query.filter_by(id=user_id).with_entities(User.guessables).limit(30).all()
-
-    @staticmethod
     def get_user_by_twitch_id(twitch_id):
         return User.query.filter_by(twitch_id=twitch_id).first()
 
@@ -47,19 +43,26 @@ class User(UserMixin, db.Model):
 
 
 class Guessable(db.Model):
-    from sqlalchemy.dialects.postgresql import UUID
+    from sqlalchemy.dialects.postgresql import UUID, JSONB
     from uuid import uuid4
 
     __tablename__ = 'guessables'
 
     uuid = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     name = db.Column(db.String)
-    variations = db.Column(db.PickleType)
+    variations = db.Column(JSONB)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-
-    def __init__(self, name, variations):
-        self.name = name
-        self.varations = variations
 
     def __repr__(self):
         return f'<guessable uuid: {self.uuid}>'
+
+    def create_guessable(self, name, variations, user_id):
+        self.name = name
+        self.variations = variations
+        self.user_id = user_id
+        db.session.add(self)
+        db.session.commit()
+
+    @staticmethod
+    def get_users_guessables(user_id):
+        return Guessable.query.filter_by(user_id=user_id).limit(30).all()
