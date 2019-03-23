@@ -64,5 +64,17 @@ class Guessable(db.Model):
         db.session.commit()
 
     @staticmethod
+    def update_guessable(user_id, uuid, name, variations):
+        guessable = Guessable.query.filter_by(user_id=user_id, uuid=uuid).first()
+        guessable.name = name
+        guessable.variations = variations
+        db.session.commit()
+
+    @staticmethod
+    def delete_guessable(user_id, uuid):
+        Guessable.query.filter_by(user_id=user_id, uuid=uuid).delete()
+        db.session.commit()
+
+    @staticmethod
     def get_users_guessables(user_id):
         return Guessable.query.filter_by(user_id=user_id).limit(30).all()

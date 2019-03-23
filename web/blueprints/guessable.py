@@ -1,7 +1,5 @@
-import json
-
 from flask import (
-    Blueprint, flash, render_template, request, redirect, url_for
+    Blueprint, render_template, request, redirect, url_for
 )
 from flask_login import current_user, login_required
 
@@ -27,7 +25,7 @@ def create():
             errors += ['Guessable Name must be alphanumeric']
         result = [x.strip() for x in request.form['guessable_variations'].split(',')]
         for variation in result:
-            if not variation.isalnum():
+            if variation and not variation.isalnum():
                 errors += ['Guessable Variations must be alphanumeric']
                 break
         if errors:
@@ -39,14 +37,32 @@ def create():
     return render_template('guessable/create.html')
 
 
-@guessable.route('/edit/<uuid:uuid>')
+@guessable.route('/edit/<uuid:uuid>', methods=['GET', 'POST'])
 def update(uuid):
-    pass
+    if request.form:
+        errors = []
+        if not request.form['guessable_name'] or not request.form['guessable_variations']:
+            errors += ['All fields are required']
+        if not request.form['guessable_name'].isalnum():
+            errors += ['Guessable Name must be alphanumeric']
+        result = [x.strip() for x in request.form['guessable_variations'].split(',')]
+        for variation in result:
+            if variation and not variation.isalnum():
+                errors += ['Guessable Variations must be alphanumeric']
+                break
+        if errors:
+            return render_template('guessable/update.html', errors=errors)
+
+        Guessable.update_guessable(current_user.id, uuid, request.form['guessable_name'], result)
+        return redirect(url_for('guessable.index'))
+    return render_template('guessable/update.html')
 
 
-@guessable.route('/delete/<uuid:uuid>')
+@guessable.route('/delete/<uuid:uuid>', methods=['POST'])
 def delete(uuid):
-    pass
+    print(uuid, flush=True)
+    Guessable.delete_guessable(current_user.id, uuid)
+    return redirect(url_for('guessable.index'))
 
 
 @guessable.before_request

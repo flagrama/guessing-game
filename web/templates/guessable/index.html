@@ -2,10 +2,10 @@
 {% block title %}Guessables{% endblock %}
 {% block content %}
     <h2>Guessables</h2>
+    {% if guessables|length < 30 %}
+        <p><a href="{{ url_for('guessable.create') }}">Add Guessable</a></p>
+    {% endif %}
     {% if guessables %}
-        {% if guessables|length < 30 %}
-            <p><a href="{{ url_for('guessable.create') }}">Add Guessable</a></p>
-        {% endif %}
         {% for guessable in guessables %}
             {{ guessable.name }} <a href="{{ url_for('guessable.update', uuid=guessable.uuid) }}">Edit</a>
             <form action="{{ url_for('guessable.delete', uuid=guessable.uuid) }}" method="post">
