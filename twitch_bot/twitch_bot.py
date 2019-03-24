@@ -5,7 +5,7 @@ import redis
 import irc.bot
 import psycopg2
 
-from .listener import Listener
+from common import ListListener
 
 
 class TwitchBot(irc.bot.SingleServerIRCBot):
@@ -13,7 +13,8 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         self.client_id = os.environ.get('TWITCH_BOT_CLIENT_ID')
 
         self.redis_server = redis.Redis.from_url(os.environ.get('REDIS_URL'))
-        message_handler = Listener(self.handle_messages, self.redis_server, ['standard_bot'])
+        command_handler = ListListener(self.handle_messages, self.redis_server, 'standard_bot')
+        rejoin_handler = ListListener(self.handle_rejoins, self.redis_server, 'rejoin')
 
         server = 'irc.chat.twitch.tv'
         port = 6667
@@ -22,17 +23,18 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
             self, [(server, port, token)], username, username
         )
 
-        message_handler.start()
+        command_handler.start()
+        rejoin_handler.start()
 
     def on_welcome(self, connection, event):
         connection.cap('REQ', ':twitch.tv/membership')
         connection.cap('REQ', ':twitch.tv/tags')
         connection.cap('REQ', ':twitch.tv/commands')
 
-        users = [x[0] for x in self.__execute_sql("SELECT twitch_login_name FROM users WHERE bot_enabled IS TRUE")]
-        for user in users:
-            connection.join(f'#{user}')
-            connection.privmsg(f'#{user}', 'Hello, World!')
+        if os.environ.get('DYNO') == 'standard_bot.1':
+            users = [x[0] for x in self.__execute_sql("SELECT twitch_login_name FROM users WHERE bot_enabled IS TRUE")]
+            for user in users:
+                self.redis_server.rpush('rejoin', user)
 
     def on_pubmsg(self, connection, event):
         # If a chat message starts with an exclamation point, try to run it as a command
@@ -68,15 +70,20 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
             if is_active and len(args_list) > 1:
                 self.redis_server.rpush(event.target, f'GUESS {args_list[1]}')
 
-    def handle_messages(self, channel, data):
-        data = data.decode('utf-8')
+    def handle_messages(self, message):
+        message = message.decode('utf-8')
 
-        if 'JOIN' in data[:4]:
-            self.connection.join(f'#{data[5:]}')
-            self.connection.privmsg(f'#{data[5:]}', f'Welcome, {data[5:]}! Thanks for using the Guessing Game.')
-        if 'PART' in data[:4]:
-            self.connection.privmsg(f'#{data[5:]}', f'See you soon {data[5:]}.')
-            self.connection.part(f'#{data[5:]}')
+        if 'JOIN' in message[:4]:
+            self.connection.join(f'#{message[5:]}')
+            self.connection.privmsg(f'#{message[5:]}', f'Welcome, {message[5:]}! Thanks for using the Guessing Game.')
+        if 'PART' in message[:4]:
+            self.connection.privmsg(f'#{message[5:]}', f'See you soon {message[5:]}.')
+            self.connection.part(f'#{message[5:]}')
+
+    def handle_rejoins(self, message):
+        message = message.decode('utf-8')
+
+        self.connection.join(f'#{message}')
 
     @staticmethod
     def get_tag(tags, target_tag):

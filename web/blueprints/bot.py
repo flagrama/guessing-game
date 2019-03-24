@@ -14,7 +14,7 @@ def change_status():
     result = current_user.change_bot_enabled()
     if result:
         message = f'JOIN {current_user.twitch_login_name}'
-    app.config['REDIS'].publish('standard_bot', message)
+    app.config['REDIS'].rpush('standard_bot', message)
     return redirect(url_for('main.dashboard'))
 
 
