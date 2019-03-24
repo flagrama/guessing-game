@@ -52,9 +52,10 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         is_active = bool([x for x in active_games if event.target.encode() == x])
         is_pending = bool([x for x in pending_games if event.target.encode() == x])
         args_list = event.arguments[0].lower().split(' ')
+        variations_statement = f"SELECT variations FROM guessables JOIN users ON guessables.user_id=users.id WHERE users.twitch_id={room_id}"
         if user_id == room_id or is_mod:
             if command == "start":
-                if not is_active:
+                if not is_active and not is_pending:
                     self.redis_server.rpush('pending_games', f'START {event.target}')
                     self.connection.privmsg(event.target, 'Guessing Game started.')
                     return
@@ -67,10 +68,20 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
                 self.connection.privmsg(event.target, 'Guessing Game not yet active')
             if command == "answer":
                 if is_active and len(args_list) > 1:
-                    self.redis_server.rpush(event.target, f'ANSWER {args_list[1]}')
+                    variations = [x for x in self.__execute_sql(variations_statement)]
+                    result = [
+                        item for sublist in variations for subsublist in sublist for item in subsublist if item == args_list[1]
+                    ]
+                    if result:
+                        self.redis_server.publish(event.target, f'ANSWER {args_list[1]}')
         if command == "guess":
             if is_active and len(args_list) > 1:
-                self.redis_server.rpush(event.target, f'GUESS {args_list[1]}')
+                variations = [x for x in self.__execute_sql(variations_statement)]
+                result = [
+                    item for sublist in variations for subsublist in sublist for item in subsublist if item == args_list[1]
+                ]
+                if result:
+                    self.redis_server.publish(event.target, f'GUESS {user_id} {args_list[1]}')
 
     def handle_messages(self, message):
         message = message.decode('utf-8')

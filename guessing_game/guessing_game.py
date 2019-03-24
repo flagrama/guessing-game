@@ -22,6 +22,7 @@ class GuessingGameManager(object):
         if command[0] == "FINISH":
             self.redis_server.publish(command[1], 'FINISH')
             self.redis_server.srem('active_games', command[1])
+            self.redis_server.delete(f'{command[1]}_guesses')
             self.redis_server.delete(command[1])
 
 
@@ -31,5 +32,21 @@ class GuessingGame(object):
         commands_handler = SubscriptionListener(self.handle_commands, self.redis_server, [channel])
         commands_handler.start()
 
-    def handle_commands(self, message):
-        command = message.decode('utf-8')
+    def handle_commands(self, channel, data):
+        data = data.decode('utf-8').split(' ')
+        channel = channel.decode('utf-8')
+        command = data[0]
+        if command == "GUESS":
+            if len(data) < 3:
+                return
+            user_id = data[1]
+            guessable = data[2]
+            self.redis_server.hset(f'{channel}_guesses', user_id, guessable)
+        if command == "ANSWER":
+            if len(data) < 2:
+                return
+            guessable = data[1]
+            guesses = self.redis_server.hgetall(f'{channel}_guesses')
+            for user_id, guess in guesses.items():
+                if guess.decode('utf-8') == guessable:
+                    self.redis_server.hdel(f'{channel}_guesses', user_id)
