@@ -1,0 +1,126 @@
+.grid
+{
+    display: grid;
+    grid-template-columns: 15% 50% 35%;
+    grid-template-rows: 40px auto 40px;
+}
+
+.form-grid
+{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.form-grid input, .form-grid label
+{
+    margin: 5px 0;
+}
+
+.form-labels
+{
+    grid-column: 1;
+}
+
+.form-inputs
+{
+    grid-column: 2;
+}
+
+.form-submit
+{
+    grid-column: 2;
+}
+
+.twitch-button {
+    background-color: #6441A4;
+    border: none;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    vertical-align: middle;
+    font-weight: 600;
+}
+
+.nav-button
+{
+    height: 40px;
+}
+
+.clean-link
+{
+    text-decoration: none;
+}
+
+.inline-block
+{
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.float-right
+{
+    float: right;
+}
+
+nav
+{
+    grid-row: 1;
+}
+
+h1.site-name
+{
+    grid-column: 1;
+    align-self: center;
+    font-size: x-large;
+}
+
+h1.site-name a
+{
+    color: black;
+}
+
+nav.buttons
+{
+    grid-column: 3;
+    align-self: center;
+    justify-self: right;
+}
+
+nav.nav-links
+{
+    grid-column: 2;
+    align-self: center;
+}
+
+nav.sidebar-nav
+{
+    grid-column: 1;
+    grid-row: 2;
+}
+
+nav ul
+{
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+nav ul li
+{
+    display: inline;
+}
+
+main
+{
+    grid-row: 2;
+    grid-column-start: 2;
+    grid-column-end: 4;
+}
+
+.footer
+{
+    grid-row: 3;
+    grid-column-start: 2;
+    grid-column-end: 4;
+    padding-top: 2em;
+}

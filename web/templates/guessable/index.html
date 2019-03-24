@@ -7,11 +7,16 @@
     {% endif %}
     {% if guessables %}
         {% for guessable in guessables %}
-            {{ guessable.name }} <a href="{{ url_for('guessable.update', uuid=guessable.uuid) }}">Edit</a>
-            <form action="{{ url_for('guessable.delete', uuid=guessable.uuid) }}" method="post">
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
-                <input type="submit" value="Delete" />
-            </form>
+            <fieldset>
+                {{ guessable.name }}
+                <div class="float-right">
+                    <a href="{{ url_for('guessable.update', uuid=guessable.uuid) }}">Edit</a>
+                    <form action="{{ url_for('guessable.delete', uuid=guessable.uuid) }}" method="post" class="inline-block">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+                        <input type="submit" value="Delete" />
+                    </form>
+                </div>
+            </fieldset>
         {% endfor %}
     {% endif %}
 {% endblock %}}
