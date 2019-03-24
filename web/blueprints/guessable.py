@@ -1,38 +1,32 @@
 from flask import (
-    Blueprint, render_template, request, redirect, url_for
+    Blueprint, flash, render_template, request, redirect, url_for
 )
 from flask_login import current_user, login_required
 
 from web.models import Guessable
-
 
 guessable = Blueprint('guessable', __name__)
 
 
 @guessable.route('/')
 def index():
-    guessables = Guessable.get_users_guessables(current_user.id)
+    guessables = current_user.get_user_guessables()
     return render_template('guessable/index.html', guessables=guessables)
 
 
 @guessable.route('/create', methods=['GET', 'POST'])
 def create():
+    if current_user.count_user_guessables() >= 30:
+        flash('You already have the maximum number of guessables', 'info')
+        return redirect(url_for('guessable.index'))
     if request.form:
-        errors = []
-        if not request.form['guessable_name'] or not request.form['guessable_variations']:
-            errors += ['All fields are required']
-        if not request.form['guessable_name'].isalnum():
-            errors += ['Guessable Name must be alphanumeric']
-        result = [x.strip() for x in request.form['guessable_variations'].split(',')]
-        for variation in result:
-            if variation and not variation.isalnum():
-                errors += ['Guessable Variations must be alphanumeric']
-                break
+        name, variations, errors = validate_input(
+            request.form['guessable_name'], request.form['guessable_variations'], None
+        )
         if errors:
             return render_template('guessable/create.html', errors=errors)
-
         new_guessable = Guessable()
-        new_guessable.create_guessable(request.form['guessable_name'], result, current_user.id)
+        new_guessable.create_guessable(name, variations, current_user.id)
         return redirect(url_for('guessable.index'))
     return render_template('guessable/create.html')
 
@@ -40,29 +34,46 @@ def create():
 @guessable.route('/edit/<uuid:uuid>', methods=['GET', 'POST'])
 def update(uuid):
     if request.form:
-        errors = []
-        if not request.form['guessable_name'] or not request.form['guessable_variations']:
-            errors += ['All fields are required']
-        if not request.form['guessable_name'].isalnum():
-            errors += ['Guessable Name must be alphanumeric']
-        result = [x.strip() for x in request.form['guessable_variations'].split(',')]
-        for variation in result:
-            if variation and not variation.isalnum():
-                errors += ['Guessable Variations must be alphanumeric']
-                break
+        name, variations, errors = validate_input(
+            request.form['guessable_name'], request.form['guessable_variations'], uuid
+        )
         if errors:
             return render_template('guessable/update.html', errors=errors)
-
-        Guessable.update_guessable(current_user.id, uuid, request.form['guessable_name'], result)
+        current_guessable = current_user.get_user_guessable(uuid)
+        current_guessable.update_guessable(name, variations)
         return redirect(url_for('guessable.index'))
     return render_template('guessable/update.html')
 
 
 @guessable.route('/delete/<uuid:uuid>', methods=['POST'])
 def delete(uuid):
-    print(uuid, flush=True)
-    Guessable.delete_guessable(current_user.id, uuid)
+    current_guessable = current_user.get_user_guessable(uuid)
+    current_guessable.delete_guessable()
     return redirect(url_for('guessable.index'))
+
+
+def validate_input(name, variations, uuid):
+    errors = []
+    if not name or not variations:
+        errors += ['All fields are required']
+    if not all(x.isalnum() or x.isspace() for x in name):
+        errors += ['Guessable Name must be alphanumeric']
+    result = ensure_variations_unique_per_user(variations, uuid)
+    if not result:
+        errors += ['Guessable Variations cannot be empty. Duplicates and non-unique values are automatically removed.']
+    for variation in result:
+        if variation and not variation.isalnum():
+            errors += ['Guessable Variations must be alphanumeric']
+            break
+    return name, result, errors
+
+
+def ensure_variations_unique_per_user(variations, uuid=None):
+    guessables = current_user.get_all_user_guessables()
+    existing_variations = [item for sublist in guessables for item in sublist.variations if sublist.uuid != uuid]
+    result = []
+    [result.append(x.strip().lower()) for x in variations.split(',') if x not in result and x not in existing_variations]
+    return result
 
 
 @guessable.before_request

@@ -33,6 +33,15 @@ class User(UserMixin, db.Model):
         db.session.commit()
         return self.bot_enabled
 
+    def count_user_guessables(self):
+        return len(self.guessables)
+
+    def get_user_guessables(self):
+        return self.guessables[:30]
+
+    def get_all_user_guessables(self):
+        return self.guessables
+
     @staticmethod
     def get_user_by_twitch_id(twitch_id):
         return User.query.filter_by(twitch_id=twitch_id).first()
@@ -40,6 +49,10 @@ class User(UserMixin, db.Model):
     @staticmethod
     def get_user_by_id(user_id):
         return User.query.filter_by(id=user_id).first()
+
+    @staticmethod
+    def get_user_guessable(uuid):
+        return Guessable.get_guessable_by_uuid(uuid)
 
 
 class Guessable(db.Model):
@@ -63,18 +76,15 @@ class Guessable(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    @staticmethod
-    def update_guessable(user_id, uuid, name, variations):
-        guessable = Guessable.query.filter_by(user_id=user_id, uuid=uuid).first()
-        guessable.name = name
-        guessable.variations = variations
+    def update_guessable(self, name, variations):
+        self.name = name
+        self.variations = variations
+        db.session.commit()
+
+    def delete_guessable(self):
+        db.session.delete(self)
         db.session.commit()
 
     @staticmethod
-    def delete_guessable(user_id, uuid):
-        Guessable.query.filter_by(user_id=user_id, uuid=uuid).delete()
-        db.session.commit()
-
-    @staticmethod
-    def get_users_guessables(user_id):
-        return Guessable.query.filter_by(user_id=user_id).limit(30).all()
+    def get_guessable_by_uuid(uuid):
+        return Guessable.query.filter_by(uuid=uuid).first()
