@@ -12,8 +12,8 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
     def __init__(self, username, token):
         self.client_id = os.environ.get('TWITCH_BOT_CLIENT_ID')
 
-        redis_server = redis.Redis.from_url(os.environ.get('REDIS_URL'))
-        message_handler = Listener(self.handle_messages, redis_server, ['standard_bot'])
+        self.redis_server = redis.Redis.from_url(os.environ.get('REDIS_URL'))
+        message_handler = Listener(self.handle_messages, self.redis_server, ['standard_bot'])
 
         server = 'irc.chat.twitch.tv'
         port = 6667
@@ -34,6 +34,40 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
             connection.join(f'#{user}')
             connection.privmsg(f'#{user}', 'Hello, World!')
 
+    def on_pubmsg(self, connection, event):
+        # If a chat message starts with an exclamation point, try to run it as a command
+        if event.arguments[0][:1] == '!':
+            command = event.arguments[0].split(' ')[0][1:].lower()
+            self.do_command(event, command)
+        return
+
+    def do_command(self, event, command):
+        user_id = self.get_tag(event.tags, 'user-id')
+        room_id = self.get_tag(event.tags, 'room-id')
+        is_mod = bool(int(self.get_tag(event.tags, 'mod')))
+        active_games = self.redis_server.smembers('active_games')
+        is_active = bool([x for x in active_games if event.target.encode() == x])
+        args_list = event.arguments[0].split(' ').lower()
+        if user_id == room_id or is_mod:
+            if command == "start":
+                if not is_active:
+                    self.redis_server.rpush('pending_games', event.target)
+                    self.connection.privmsg(event.target, 'Guessing Game started.')
+                    return
+                self.connection.privmsg(event.target, 'Guessing Game already active.')
+            if command == "finish":
+                if is_active:
+                    self.redis_server.rpush('ending_games', event.target)
+                    self.connection.privmsg(event.target, 'Guessing Game finished.')
+                    return
+                self.connection.privmsg(event.target, 'Guessing Game not yet active')
+            if command == "answer":
+                if is_active and len(args_list) > 1:
+                    self.redis_server.rpush(event.target, f'ANSWER {args_list[1]}')
+        if command == "guess":
+            if is_active and len(args_list) > 1:
+                self.redis_server.rpush(event.target, f'GUESS {args_list[1]}')
+
     def handle_messages(self, channel, data):
         data = data.decode('utf-8')
 
@@ -43,6 +77,13 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         if 'PART' in data[:4]:
             self.connection.privmsg(f'#{data[5:]}', f'See you soon {data[5:]}.')
             self.connection.part(f'#{data[5:]}')
+
+    @staticmethod
+    def get_tag(tags, target_tag):
+        for tag in tags:
+            if tag['key'] == target_tag:
+                return tag['value']
+        return None
 
     @staticmethod
     def __execute_sql(sql):
