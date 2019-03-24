@@ -13,8 +13,8 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         self.client_id = os.environ.get('TWITCH_BOT_CLIENT_ID')
 
         self.redis_server = redis.Redis.from_url(os.environ.get('REDIS_URL'))
-        command_handler = ListListener(self.handle_messages, self.redis_server, 'standard_bot')
-        rejoin_handler = ListListener(self.handle_rejoins, self.redis_server, 'rejoin')
+        command_handler = ListListener(self.handle_messages, self.redis_server, ['standard_bot'])
+        rejoin_handler = ListListener(self.handle_rejoins, self.redis_server, ['rejoin'])
 
         server = 'irc.chat.twitch.tv'
         port = 6667
@@ -48,18 +48,20 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         room_id = self.get_tag(event.tags, 'room-id')
         is_mod = bool(int(self.get_tag(event.tags, 'mod')))
         active_games = self.redis_server.smembers('active_games')
+        pending_games = self.redis_server.lrange('pending_games', 0, -1)
         is_active = bool([x for x in active_games if event.target.encode() == x])
-        args_list = event.arguments[0].split(' ').lower()
+        is_pending = bool([x for x in pending_games if event.target.encode() == x])
+        args_list = event.arguments[0].lower().split(' ')
         if user_id == room_id or is_mod:
             if command == "start":
                 if not is_active:
-                    self.redis_server.rpush('pending_games', event.target)
+                    self.redis_server.rpush('pending_games', f'START {event.target}')
                     self.connection.privmsg(event.target, 'Guessing Game started.')
                     return
                 self.connection.privmsg(event.target, 'Guessing Game already active.')
             if command == "finish":
                 if is_active:
-                    self.redis_server.rpush('ending_games', event.target)
+                    self.redis_server.rpush('ending_games', f'FINISH {event.target}')
                     self.connection.privmsg(event.target, 'Guessing Game finished.')
                     return
                 self.connection.privmsg(event.target, 'Guessing Game not yet active')

@@ -19,14 +19,15 @@ class SubscriptionListener(threading.Thread):
 
 
 class ListListener(threading.Thread):
-    def __init__(self, callback, redis, key):
+    def __init__(self, callback, redis, keys):
         threading.Thread.__init__(self, daemon=True)
         self.callback = callback
         self.redis = redis
-        self.key = key
+        self.keys = keys
 
     def run(self):
         while True:
-            command = self.redis.lpop(self.key)
-            if command:
-                self.callback(command)
+            for key in self.keys:
+                command = self.redis.lpop(key)
+                if command:
+                    self.callback(command)
