@@ -3,6 +3,43 @@ import urllib.parse as urlparse
 
 import psycopg2
 
+SQL_PARTICIPANT_INSERT = "INSERT INTO participants " \
+                         "(uuid, name, twitch_id, points, current_points, user_id) " \
+                         "VALUES ('{}','{}', {}, 0, 0, {})"
+SQL_GET_BOT_ENABLED_ROOMS = "SELECT {} FROM {} WHERE {}".format(
+    'twitch_login_name',
+    'users',
+    'bot_enabled IS TRUE'
+)
+SQL_CHANNEL_USER_ID = "SELECT {} FROM {} WHERE {}".format(
+    'id',
+    'users',
+    'users.twitch_id={}'
+)
+SQL_CURRENT_USER_VARIATIONS = "SELECT {} FROM {} JOIN {} ON {} WHERE {}".format(
+    'variations',
+    'guessables',
+    'users',
+    'guessables.user_id=users.id',
+    'users.twitch_id={}'
+)
+SQL_GET_POINTS = "SELECT {} FROM {} JOIN {} ON {} WHERE {} AND {}".format(
+    '{}',
+    'participants',
+    'users',
+    'participants.user_id=users.id',
+    'users.twitch_id={}',
+    'participants.twitch_id={}'
+)
+SQL_GET_PARTICIPANT = "SELECT {} FROM {} JOIN {} ON {} WHERE {} AND {}".format(
+    '*',
+    'participants',
+    'users',
+    'participants.user_id=users.id',
+    'users.twitch_id={}',
+    'participants.twitch_id={}'
+)
+
 
 def execute_select_sql(sql):
     url = urlparse.urlparse(os.environ['DATABASE_URL'])
