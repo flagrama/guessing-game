@@ -3,7 +3,6 @@ from uuid import uuid4
 
 import redis
 import irc.bot
-import psycopg2
 
 from common import ListListener, Database
 
@@ -32,7 +31,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         connection.cap('REQ', ':twitch.tv/commands')
 
         if os.environ.get('DYNO') == 'standard_bot.1':
-            users = [x[0] for x in Database.execute_select_sql("SELECT twitch_login_name FROM users WHERE bot_enabled IS TRUE")]
+            users = [x[0] for x in Database.execute_select_sql(Database.SQL_GET_BOT_ENABLED_ROOMS)]
             for user in users:
                 self.redis_server.rpush('rejoin', user)
 
@@ -53,8 +52,6 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         is_active = bool([x for x in active_games if event.target.encode() == x])
         is_pending = bool([x for x in pending_games if event.target.encode() == x])
         args_list = event.arguments[0].lower().split(' ')
-        channel_user_id_sql = f"SELECT id FROM users WHERE users.twitch_id={room_id}"
-        variations_statement = f"SELECT variations FROM guessables JOIN users ON guessables.user_id=users.id WHERE users.twitch_id={room_id}"
         if user_id == room_id or is_mod:
             if command == "start":
                 if not is_active and not is_pending:
@@ -70,28 +67,34 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
                 self.connection.privmsg(event.target, 'Guessing Game not yet active')
             if command == "answer":
                 if is_active and len(args_list) > 1:
-                    variations = [x for x in Database.execute_select_sql(variations_statement)]
+                    variations = [x for x in Database.execute_select_sql(
+                        Database.SQL_CURRENT_USER_VARIATIONS.format(room_id)
+                    )]
                     result = self.check_variations(variations, args_list[1])
                     if result:
                         self.redis_server.publish(event.target, f'ANSWER {args_list[1]}')
         if command == "points":
             if is_active:
-                get_points_sql = f"SELECT current_points FROM participants JOIN users ON participants.user_id=users.id WHERE users.twitch_id={room_id} AND participants.twitch_id={user_id}"
-                points = Database.execute_select_sql(get_points_sql)[0][0]
+                points = Database.execute_select_sql(Database.SQL_GET_POINTS.format(
+                    'current_points', room_id, user_id
+                ))[0][0]
                 self.connection.privmsg(event.target, f"{username} has {points} points in the active game.")
             else:
-                get_points_sql = f"SELECT points FROM participants JOIN users ON participants.user_id=users.id WHERE users.twitch_id={room_id} AND participants.twitch_id={user_id}"
-                points = Database.execute_select_sql(get_points_sql)[0][0]
+                points = Database.execute_select_sql(Database.SQL_GET_POINTS.format(
+                    'points', room_id, user_id
+                ))[0][0]
                 self.connection.privmsg(event.target, f"{username} has {points} total points.")
         if command == "guess":
             if is_active and len(args_list) > 1:
-                get_participant_sql = f"SELECT * FROM participants JOIN users ON participants.user_id=users.id WHERE users.twitch_id={room_id} AND participants.twitch_id={user_id}"
-                participant = Database.execute_select_sql(get_participant_sql)
+                participant = Database.execute_select_sql(Database.SQL_GET_PARTICIPANT.format(room_id, user_id))
                 if not participant:
-                    channel_user_id = Database.execute_select_sql(channel_user_id_sql)
-                    create_participant_sql = f"INSERT INTO participants (uuid, name, twitch_id, points, current_points, user_id) VALUES ('{uuid4()}','{username}', {user_id}, 0, 0, {channel_user_id[0][0]})"
+                    channel_user_id = Database.execute_select_sql(Database.SQL_CHANNEL_USER_ID.format(room_id))[0][0]
+                    create_participant_sql = Database.SQL_PARTICIPANT_INSERT.format(
+                        uuid4(), username, user_id, channel_user_id
+                    )
                     Database.execute_insert_update_sql(create_participant_sql)
-                variations = [x for x in Database.execute_select_sql(variations_statement)]
+                variations = [x for x in Database.execute_select_sql(
+                    Database.SQL_CURRENT_USER_VARIATIONS.format(room_id))]
                 result = self.check_variations(variations, args_list[1])
                 if result:
                     self.redis_server.publish(event.target, f'GUESS {user_id} {args_list[1]}')
