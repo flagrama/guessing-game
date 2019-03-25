@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %} - Guessing Game</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="grid">
+    <h1 class="site-name"><a href="{{ url_for('main.index') }}" class="clean-link">Guessing Game</a></h1>
+    <nav class="buttons">
+        <a href="https://discord.gg/dZ3KSqC"><img src="{{ url_for('static', filename='img/discord.png') }}" class="inline-block nav-button" height="30px" alt="Discord" /></a>
+        <a href="https://patreon.com/flagrama"><img src="{{ url_for('static', filename='img/patreon.png') }}" class="inline-block nav-button" height="30px" alt="Discord" /></a>
+        {% if current_user.is_active %}
+            <a href="{{ url_for('authentication.logout') }}" class="twitch-button clean-link nav-button">Log Out</a>
+        {% else %}
+            <a href="{{ url_for('authentication.login') }}" class="twitch-button clean-link nav-button">Log In with Twitch</a>
+        {% endif %}
+    </nav>
+    <nav class="nav-links">
+        <ul>
+            {% if current_user.is_active %}
+                <li>
+                    <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    <nav class="sidebar-nav">
+        {% if current_user.is_active %}
+            <ul>
+                <li><a href="{{ url_for('guessable.index') }}">Guessables</a></li>
+            </ul>
+        {% endif %}
+    </nav>
+    <main>
+        {% with messages = get_flashed_messages(with_categories=True) %}
+          {% if messages %}
+            <ul class="flashes">
+            {% for category, message in messages %}
+              <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+    <section class="footer">
+        Copyright 2019 Vincent "flagrama" Cunningham
+    </section>
+</div>
+</body>
+</html>

@@ -1,8 +1,17 @@
 {
     "environments": {
         "test": {
-        "scripts": {
-            "test": "python -m unittest discover"
+            "buildpacks": [
+                { "url": "heroku/python" }
+            ],
+            "env": {
+                "APP_SETTINGS": "web.config.TestingConfig",
+                "SECRET_KEY": "development",
+                "FLASK_APP": "web.wsgi.py"
+            },
+            "scripts": {
+                "test-setup": "pip install -r requirements-test.txt",
+                "test": "python -m unittest discover"
             }
         }
     }

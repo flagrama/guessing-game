@@ -1,0 +1,20 @@
+{% extends 'guessable/base.html' %}
+{% block action %}Create{% endblock %}
+{% block action_content %}
+    <p><strong><abbr title="comma-separated">*</abbr></strong> Guessable Variations are a comma-separated list.</p>
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+    <fieldset>
+        <div class="form-grid">
+            <label for="guessable_name" class="form-labels">
+                <span>Guessable Name</span>
+            </label>
+            <input type="text" id="guessable_name" name="guessable_name" class="form-inputs" />
+            <label for="guessable_variations" class="form-labels">
+                <span>Guessable Variations</span>
+                <strong><abbr title="comma-separated">*</abbr></strong>
+            </label>
+            <input type="text" id="guessable_variations" name="guessable_variations" class="form-inputs" />
+            <input type="submit" value="Create Guessable" class="form-submit" />
+        </div>
+    </fieldset>
+{% endblock %}}
