@@ -12,6 +12,7 @@ class User(UserMixin, db.Model):
     twitch_display_name = db.Column(db.String)
     bot_enabled = db.Column(db.Boolean, nullable=False)
     guessables = db.relationship("Guessable")
+    participants = db.relationship("Participant")
 
     def __init__(self, twitch_id, twitch_login_name, twitch_display_name):
         self.twitch_id = twitch_id
@@ -53,6 +54,19 @@ class User(UserMixin, db.Model):
     @staticmethod
     def get_user_guessable(uuid):
         return Guessable.get_guessable_by_uuid(uuid)
+
+
+class Participant(db.Model):
+    from sqlalchemy.dialects.postgresql import UUID
+    from uuid import uuid4
+
+    __tablename__ = 'participants'
+
+    uuid = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    name = db.Column(db.String)
+    twitch_id = db.Column(db.Integer)
+    points = db.Column(db.Integer)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
 
 class Guessable(db.Model):
