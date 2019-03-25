@@ -75,15 +75,19 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
                         self.redis_server.publish(event.target, f'ANSWER {args_list[1]}')
         if command == "points":
             if is_active:
-                points = Database.execute_select_sql(Database.SQL_GET_POINTS.format(
+                data = Database.execute_select_sql(Database.SQL_GET_POINTS.format(
                     'current_points', room_id, user_id
-                ))[0][0]
-                self.connection.privmsg(event.target, f"{username} has {points} points in the active game.")
+                ))
+                if data:
+                    points = data[0][0]
+                    self.connection.privmsg(event.target, f"{username} has {points} points in the active game.")
             else:
-                points = Database.execute_select_sql(Database.SQL_GET_POINTS.format(
+                data = Database.execute_select_sql(Database.SQL_GET_POINTS.format(
                     'points', room_id, user_id
-                ))[0][0]
-                self.connection.privmsg(event.target, f"{username} has {points} total points.")
+                ))
+                if data:
+                    points = data[0][0]
+                    self.connection.privmsg(event.target, f"{username} has {points} total points.")
         if command == "guess":
             if is_active and len(args_list) > 1:
                 participant = Database.execute_select_sql(Database.SQL_GET_PARTICIPANT.format(room_id, user_id))
