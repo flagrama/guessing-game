@@ -50,7 +50,10 @@ class GuessingGame(object):
             guessable = data[1]
             guesses = self.redis_server.hgetall(f'{channel}_guesses')
             for user_id, guess in guesses.items():
-                if guess.decode('utf-8') == guessable:
+                variations_statement = f"SELECT variations FROM guessables JOIN users ON guessables.user_id=users.id WHERE users.twitch_login_name='{channel.split('#')[1]}'"
+                variations = [x for x in Database.execute_select_sql(variations_statement)]
+                current_variations = [item for sublist in variations for item in sublist if guessable in item]
+                if [item[0] for item in current_variations if guess.decode('utf-8') in item]:
                     user_id = user_id.decode('utf-8')
                     get_participant_sql = f"SELECT points, current_points FROM participants JOIN users ON participants.user_id=users.id WHERE users.twitch_login_name='{channel.split('#')[1]}' AND participants.twitch_id={user_id}"
                     points, current_points = Database.execute_select_sql(get_participant_sql)[0]
