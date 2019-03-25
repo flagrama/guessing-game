@@ -66,6 +66,7 @@ class Participant(db.Model):
     name = db.Column(db.String)
     twitch_id = db.Column(db.Integer)
     points = db.Column(db.Integer)
+    current_points = db.Column(db.Integer)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
 

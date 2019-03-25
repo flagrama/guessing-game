@@ -24,6 +24,8 @@ class GuessingGameManager(object):
             self.redis_server.srem('active_games', command[1])
             self.redis_server.delete(f'{command[1]}_guesses')
             self.redis_server.delete(command[1])
+            update_participant_sql = f"UPDATE participants SET current_points=0 FROM users WHERE participants.user_id=users.id AND users.twitch_login_name='{command[1].split('#')[1]}'"
+            Database.execute_insert_update_sql(update_participant_sql)
 
 
 class GuessingGame(object):
@@ -50,8 +52,10 @@ class GuessingGame(object):
             for user_id, guess in guesses.items():
                 if guess.decode('utf-8') == guessable:
                     user_id = user_id.decode('utf-8')
-                    get_participant_sql = f"SELECT points FROM participants JOIN users ON participants.user_id=users.id WHERE users.twitch_login_name='{channel.split('#')[1]}' AND participants.twitch_id={user_id}"
-                    points = Database.execute_select_sql(get_participant_sql)[0][0]
+                    get_participant_sql = f"SELECT points, current_points FROM participants JOIN users ON participants.user_id=users.id WHERE users.twitch_login_name='{channel.split('#')[1]}' AND participants.twitch_id={user_id}"
+                    points, current_points = Database.execute_select_sql(get_participant_sql)[0]
                     update_participant_sql = f"UPDATE participants SET points={points + 1} FROM users WHERE participants.user_id=users.id AND users.twitch_login_name='{channel.split('#')[1]}' AND participants.twitch_id={user_id}"
+                    Database.execute_insert_update_sql(update_participant_sql)
+                    update_participant_sql = f"UPDATE participants SET current_points={current_points + 1} FROM users WHERE participants.user_id=users.id AND users.twitch_login_name='{channel.split('#')[1]}' AND participants.twitch_id={user_id}"
                     Database.execute_insert_update_sql(update_participant_sql)
                     self.redis_server.hdel(f'{channel}_guesses', user_id)

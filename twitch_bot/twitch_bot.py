@@ -74,13 +74,22 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
                     result = self.check_variations(variations, args_list[1])
                     if result:
                         self.redis_server.publish(event.target, f'ANSWER {args_list[1]}')
+        if command == "points":
+            if is_active:
+                get_points_sql = f"SELECT current_points FROM participants JOIN users ON participants.user_id=users.id WHERE users.twitch_id={room_id} AND participants.twitch_id={user_id}"
+                points = Database.execute_select_sql(get_points_sql)[0][0]
+                self.connection.privmsg(event.target, f"{username} has {points} points in the active game.")
+            else:
+                get_points_sql = f"SELECT points FROM participants JOIN users ON participants.user_id=users.id WHERE users.twitch_id={room_id} AND participants.twitch_id={user_id}"
+                points = Database.execute_select_sql(get_points_sql)[0][0]
+                self.connection.privmsg(event.target, f"{username} has {points} total points.")
         if command == "guess":
             if is_active and len(args_list) > 1:
                 get_participant_sql = f"SELECT * FROM participants JOIN users ON participants.user_id=users.id WHERE users.twitch_id={room_id} AND participants.twitch_id={user_id}"
                 participant = Database.execute_select_sql(get_participant_sql)
                 if not participant:
                     channel_user_id = Database.execute_select_sql(channel_user_id_sql)
-                    create_participant_sql = f"INSERT INTO participants (uuid, name, twitch_id, points, user_id) VALUES ('{uuid4()}','{username}', {user_id}, 0, {channel_user_id[0][0]})"
+                    create_participant_sql = f"INSERT INTO participants (uuid, name, twitch_id, points, current_points, user_id) VALUES ('{uuid4()}','{username}', {user_id}, 0, 0, {channel_user_id[0][0]})"
                     Database.execute_insert_update_sql(create_participant_sql)
                 variations = [x for x in Database.execute_select_sql(variations_statement)]
                 result = self.check_variations(variations, args_list[1])
