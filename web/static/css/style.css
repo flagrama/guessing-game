@@ -1,33 +1,27 @@
-.grid
-{
+.grid {
     display: grid;
     grid-template-columns: 15% 50% 35%;
     grid-template-rows: 40px auto 40px;
 }
 
-.form-grid
-{
+.form-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
 }
 
-.form-grid input, .form-grid label
-{
+.form-grid input, .form-grid label {
     margin: 5px 0;
 }
 
-.form-labels
-{
+.form-labels {
     grid-column: 1;
 }
 
-.form-inputs
-{
+.form-inputs {
     grid-column: 2;
 }
 
-.form-submit
-{
+.form-submit {
     grid-column: 2;
 }
 
@@ -41,84 +35,74 @@
     font-weight: 600;
 }
 
-.nav-button
-{
+.nav-button {
     height: 40px;
 }
 
-.clean-link
-{
+.index-button {
+    height: 60px;
+}
+
+.clean-link {
     text-decoration: none;
 }
 
-.inline-block
-{
+.inline-block {
     display: inline-block;
     vertical-align: middle;
 }
 
-.float-right
-{
+.float-right {
     float: right;
 }
 
-nav
-{
+nav {
     grid-row: 1;
 }
 
-h1.site-name
-{
+h1.site-name {
     grid-column: 1;
     align-self: center;
     font-size: x-large;
 }
 
-h1.site-name a
-{
+h1.site-name a {
     color: black;
 }
 
-nav.buttons
-{
+nav.buttons {
     grid-column: 3;
     align-self: center;
     justify-self: right;
 }
 
-nav.nav-links
-{
+nav.nav-links {
     grid-column: 2;
     align-self: center;
 }
 
-nav.sidebar-nav
-{
+nav.sidebar-nav {
     grid-column: 1;
     grid-row: 2;
 }
 
-nav ul
-{
+nav ul {
     list-style-type: none;
     margin: 0;
     padding: 0;
 }
 
-nav ul li
-{
+nav ul li {
     display: inline;
 }
 
-main
-{
+main {
     grid-row: 2;
     grid-column-start: 2;
     grid-column-end: 4;
 }
 
-.footer
-{
+.footer {
     grid-row: 3;
     grid-column-start: 2;
     grid-column-end: 4;

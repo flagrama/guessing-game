@@ -9,8 +9,6 @@
 <div class="grid">
     <h1 class="site-name"><a href="{{ url_for('main.index') }}" class="clean-link">Guessing Game</a></h1>
     <nav class="buttons">
-        <a href="https://discord.gg/dZ3KSqC"><img src="{{ url_for('static', filename='img/discord.png') }}" class="inline-block nav-button" height="30px" alt="Discord" /></a>
-        <a href="https://patreon.com/flagrama"><img src="{{ url_for('static', filename='img/patreon.png') }}" class="inline-block nav-button" height="30px" alt="Discord" /></a>
         {% if current_user.is_active %}
             <a href="{{ url_for('authentication.logout') }}" class="twitch-button clean-link nav-button">Log Out</a>
         {% else %}
