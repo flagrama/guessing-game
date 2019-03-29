@@ -1,7 +1,7 @@
 .grid {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
-    grid-template-rows: auto auto auto;
+    grid-template-rows: auto auto auto auto;
 }
 
 .form-grid {
@@ -59,9 +59,15 @@
 .flex-container {
     grid-row: 1;
     grid-column: span 12;
-    justify-content: space-between;
     display: flex;
     flex-direction: column;
+    background-color: black;
+    margin-top: -10px;
+    margin-left: -10px;
+    margin-right: -10px;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: 20px;
 }
 
 h1.site-name {
@@ -69,7 +75,7 @@ h1.site-name {
 }
 
 h1.site-name a {
-    color: black;
+    color: white;
 }
 
 nav.buttons {
@@ -80,12 +86,32 @@ nav.nav-links {
     align-self: center;
 }
 
-nav.sidebar-nav {
-    display: none;
-    grid-column: 1;
+nav#sidebar-nav {
     grid-row: 2;
+    grid-column: span 12;
+    display: none;
     padding: 20px 20px 0 10px;
+    margin-right: -10px;
+    margin-left: -10px;
     justify-content: center;
+    background-color: darkgray;
+}
+
+nav#sidebar-nav ul li {
+    display: block;
+    padding-bottom: 1em;
+}
+
+a#nav-button {
+    width: 2em;
+    align-self: auto;
+    display: block;
+    float: left;
+    text-decoration: none;
+}
+
+.with_nav #sidebar-nav {
+    display: block;
 }
 
 nav ul {
@@ -99,27 +125,27 @@ nav ul li {
 }
 
 main {
-    grid-row: 2;
+    grid-row: 3;
     grid-column: span 12;
 }
 
 .footer {
-    grid-row: 3;
+    grid-row: 4;
     grid-column: span 12;
     padding-top: 2em;
 }
 
 @media (min-width: 40.625em) {
-    nav.sidebar-nav {
+    nav#sidebar-nav {
         display: block;
     }
 
-    main {
-        grid-column-start: 2;
-        grid-column-end: 13;
+    a#nav-button {
+        display:none;
+        float: none;
     }
 
-    .footer {
+    main {
         grid-column-start: 2;
         grid-column-end: 13;
     }
@@ -128,9 +154,31 @@ main {
 @media (min-width: 26.563em) {
     .flex-container {
         flex-direction: row;
+        padding-bottom: 0;
     }
 
     nav.buttons {
+        margin-left: auto;
         align-self: center;
+    }
+
+    a#nav-button {
+        align-self: center;
+    }
+
+    nav#sidebar-nav {
+        grid-row-start: 2;
+        grid-row-end: 4;
+        grid-column: auto;
+        margin-right: 10px;
+        padding-bottom: 0;
+    }
+
+    main {
+        grid-row: 2;
+    }
+
+    .footer {
+        grid-row: 3;
     }
 }
