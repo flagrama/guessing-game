@@ -15,7 +15,9 @@ class SubscriptionListener(threading.Thread):
     def run(self):
         for message in self.pubsub.listen():
             if message['type'] == 'message':
-                self.callback(message['channel'], message['data'])
+                result = self.callback(message['channel'], message['data'])
+                if result == "EXIT":
+                    return
 
 
 class ListListener(threading.Thread):
@@ -30,4 +32,6 @@ class ListListener(threading.Thread):
             for key in self.keys:
                 command = self.redis.lpop(key)
                 if command:
-                    self.callback(command)
+                    result = self.callback(command)
+                    if result == "EXIT":
+                        return

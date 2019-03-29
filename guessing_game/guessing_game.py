@@ -73,3 +73,4 @@ class GuessingGame(object):
                 update_participant_sql = f"UPDATE participants SET points={points + user_points} FROM users WHERE participants.user_id=users.id AND users.twitch_login_name='{channel.split('#')[1]}' AND participants.twitch_id={user}"
                 Database.execute_insert_update_sql(update_participant_sql)
                 self.redis_server.hdel(f'{channel}_points', user)
+            return "EXIT"
