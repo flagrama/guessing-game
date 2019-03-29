@@ -69,6 +69,17 @@ class Participant(db.Model):
     current_points = db.Column(db.Integer)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
+class Result(db.Model):
+    from sqlalchemy.dialects.postgresql import UUID, JSONB
+    from uuid import uuid4
+
+    __tablename__ = 'results'
+
+    uuid = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    datetime = db.Column(db.DateTime)
+    results = db.Column(JSONB)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
 
 class Guessable(db.Model):
     from sqlalchemy.dialects.postgresql import UUID, JSONB
