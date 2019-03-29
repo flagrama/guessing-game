@@ -29,30 +29,28 @@
 </head>
 <body>
 <div class="grid">
-    <h1 class="site-name"><a href="{{ url_for('main.index') }}" class="clean-link">Guessing Game</a></h1>
-    <nav class="buttons">
-        {% if current_user.is_active %}
-            <a href="{{ url_for('authentication.logout') }}" class="twitch-button clean-link nav-button">Log Out</a>
-        {% else %}
-            <a href="{{ url_for('authentication.login') }}" class="twitch-button clean-link nav-button">Log In with Twitch</a>
-        {% endif %}
-    </nav>
-    <nav class="nav-links">
-        <ul>
+    <div class="flex-container">
+        <h1 class="site-name"><a href="{{ url_for('main.index') }}" class="clean-link">Guessing Game</a></h1>
+        <nav class="buttons">
             {% if current_user.is_active %}
-                <li>
-                    <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
-                </li>
+                <a href="{{ url_for('authentication.logout') }}" class="twitch-button clean-link nav-button">Log Out</a>
+            {% else %}
+                <a href="{{ url_for('authentication.login') }}" class="twitch-button clean-link nav-button">Log In with Twitch</a>
             {% endif %}
-        </ul>
-    </nav>
-    <nav class="sidebar-nav">
-        {% if current_user.is_active %}
-            <ul>
-                <li><a href="{{ url_for('guessable.index') }}">Guessables</a></li>
-            </ul>
-        {% endif %}
-    </nav>
+        </nav>
+    </div>
+    {% if current_user.is_active %}
+        <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li><a href="{{ url_for('guessable.index') }}">Guessables</a></li>
+                </ul>
+        </nav>
+    {% endif %}
     <main>
         {% with messages = get_flashed_messages(with_categories=True) %}
           {% if messages %}

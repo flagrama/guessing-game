@@ -1,7 +1,7 @@
 .grid {
     display: grid;
-    grid-template-columns: 15% 50% 35%;
-    grid-template-rows: 40px auto 40px;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: auto auto auto;
 }
 
 .form-grid {
@@ -56,13 +56,15 @@
     float: right;
 }
 
-nav {
+.flex-container {
     grid-row: 1;
+    grid-column: span 12;
+    justify-content: space-between;
+    display: flex;
+    flex-direction: column;
 }
 
 h1.site-name {
-    grid-column: 1;
-    align-self: center;
     font-size: x-large;
 }
 
@@ -71,19 +73,19 @@ h1.site-name a {
 }
 
 nav.buttons {
-    grid-column: 3;
-    align-self: center;
-    justify-self: right;
+    align-self: auto;
 }
 
 nav.nav-links {
-    grid-column: 2;
     align-self: center;
 }
 
 nav.sidebar-nav {
+    display: none;
     grid-column: 1;
     grid-row: 2;
+    padding: 20px 20px 0 10px;
+    justify-content: center;
 }
 
 nav ul {
@@ -98,13 +100,37 @@ nav ul li {
 
 main {
     grid-row: 2;
-    grid-column-start: 2;
-    grid-column-end: 4;
+    grid-column: span 12;
 }
 
 .footer {
     grid-row: 3;
-    grid-column-start: 2;
-    grid-column-end: 4;
+    grid-column: span 12;
     padding-top: 2em;
+}
+
+@media (min-width: 40.625em) {
+    nav.sidebar-nav {
+        display: block;
+    }
+
+    main {
+        grid-column-start: 2;
+        grid-column-end: 13;
+    }
+
+    .footer {
+        grid-column-start: 2;
+        grid-column-end: 13;
+    }
+}
+
+@media (min-width: 26.563em) {
+    .flex-container {
+        flex-direction: row;
+    }
+
+    nav.buttons {
+        align-self: center;
+    }
 }
