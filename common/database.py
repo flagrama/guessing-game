@@ -39,6 +39,29 @@ SQL_GET_PARTICIPANT = "SELECT {} FROM {} JOIN {} ON {} WHERE {} AND {}".format(
     'users.twitch_id={}',
     'participants.twitch_id={}'
 )
+SQL_GET_PARTICIPANT_TWITCH_LOGIN = "SELECT {} FROM {} JOIN {} ON {} WHERE {} AND {}".format(
+    '*',
+    'participants',
+    'users',
+    'participants.user_id=users.id',
+    'users.twitch_login={}',
+    'participants.twitch_id={}'
+)
+SQL_GET_VARIATIONS_GUESSING_GAME = "SELECT {} FROM {} JOIN {} ON {} WHERE {}".format(
+    'variations',
+    'guessables',
+    'users',
+    'guessables.user_id=users.id',
+    'users.twitch_login_name={}'
+)
+SQL_UPDATE_PARTICIPANT_POINTS = "UPDATE {} SET {} FROM {} WHERE {} AND {} AND {}".format(
+    'participants',
+    'points={}',
+    'users',
+    'participants.user_id=users.id',
+    'users.twitch_login_name={}',
+    'participants.twitch_id={}'
+)
 
 
 def execute_select_sql(sql):
