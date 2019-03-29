@@ -52,7 +52,7 @@ SQL_GET_VARIATIONS_GUESSING_GAME = "SELECT {} FROM {} JOIN {} ON {} WHERE {}".fo
     'guessables',
     'users',
     'guessables.user_id=users.id',
-    'users.twitch_login_name={}'
+    "users.twitch_login_name='{}'"
 )
 SQL_UPDATE_PARTICIPANT_POINTS = "UPDATE {} SET {} FROM {} WHERE {} AND {} AND {}".format(
     'participants',
