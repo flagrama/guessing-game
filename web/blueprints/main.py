@@ -15,3 +15,7 @@ def index():
 @login_required
 def dashboard():
     return render_template('dashboard.html')
+
+@main.route('/help')
+def help():
+    return render_template('help.html')

@@ -144,11 +144,6 @@ main {
         display:none;
         float: none;
     }
-
-    main {
-        grid-column-start: 2;
-        grid-column-end: 13;
-    }
 }
 
 @media (min-width: 26.563em) {
