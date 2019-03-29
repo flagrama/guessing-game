@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Help{% endblock %}
+{% block content %}
+<p>
+    You can log in with your Twitch account, then add "Guessables" by giving them a name and a comma-separated list of
+    "Variations" which allow several different terms to all map to the same item. Then enable the bot from the Dashboard
+    and it will join your Twitch chat.
+</p>
+
+<p>
+    In your chat you or a moderator can start a guessing game with the "!start" command and finish one with the
+    "!finish" command. With a game started anybody in chat can type "!guess variation" to make a guess of "variation"
+    and any new guess will overwrite and old one. You or a moderator can then proceed to give the answer using the
+    "!answer variation" to mark an item as the answer. This will remove all correct guesses and give those chatters a
+    point, but leave incorrect guesses in memory.
+</p>
+
+<p>
+    During a Guessing Game a chatter can type "!points" to be told how many points they have in the current game. While
+    a Guessing Game is not active the "!points" command will tell how many total points they have acquired throughout
+    the entire lifetime of the bot in your channel.
+</p>
+{% endblock %}}

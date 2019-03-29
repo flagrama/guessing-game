@@ -4,35 +4,57 @@
     <meta charset="UTF-8">
     <title>{% block title %}{% endblock %} - Guessing Game</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- HTML Meta Tags -->
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="description" content="A Guessing Game for Twitch chatters to enjoy while you're playing a game.">
+
+    <!-- Google / Search Engine Tags -->
+    <meta itemprop="name" content="Guessing Game for Twitch">
+    <meta itemprop="description" content="A Guessing Game for Twitch chatters to enjoy while you're playing a game.">
+    <meta itemprop="image" content="https://en.gravatar.com/userimage/4196346/d3782e6fb725f4fb965cc31fc3e023d7.png">
+
+    <!-- Facebook Meta Tags -->
+    <meta property="og:url" content="https://guessinggame.flagrama.com">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Guessing Game for Twitch">
+    <meta property="og:description" content="A Guessing Game for Twitch chatters to enjoy while you're playing a game.">
+    <meta property="og:image" content="https://en.gravatar.com/userimage/4196346/d3782e6fb725f4fb965cc31fc3e023d7.png">
+
+    <!-- Twitter Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Guessing Game for Twitch">
+    <meta name="twitter:description" content="A Guessing Game for Twitch chatters to enjoy while you're playing a game.">
+    <meta name="twitter:image" content="https://en.gravatar.com/userimage/4196346/d3782e6fb725f4fb965cc31fc3e023d7.png">
+
+    <!-- Meta Tags Generated via http://heymeta.com -->
 </head>
 <body>
 <div class="grid">
-    <h1 class="site-name"><a href="{{ url_for('main.index') }}" class="clean-link">Guessing Game</a></h1>
-    <nav class="buttons">
-        <a href="https://discord.gg/dZ3KSqC"><img src="{{ url_for('static', filename='img/discord.png') }}" class="inline-block nav-button" height="30px" alt="Discord" /></a>
-        <a href="https://patreon.com/flagrama"><img src="{{ url_for('static', filename='img/patreon.png') }}" class="inline-block nav-button" height="30px" alt="Discord" /></a>
-        {% if current_user.is_active %}
-            <a href="{{ url_for('authentication.logout') }}" class="twitch-button clean-link nav-button">Log Out</a>
-        {% else %}
-            <a href="{{ url_for('authentication.login') }}" class="twitch-button clean-link nav-button">Log In with Twitch</a>
-        {% endif %}
-    </nav>
-    <nav class="nav-links">
-        <ul>
+    <div class="flex-container">
+        <h1 class="site-name">
             {% if current_user.is_active %}
-                <li>
-                    <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
-                </li>
+                <a href="#sidebar-nav" id="nav-button">#</a>
             {% endif %}
-        </ul>
-    </nav>
-    <nav class="sidebar-nav">
-        {% if current_user.is_active %}
-            <ul>
-                <li><a href="{{ url_for('guessable.index') }}">Guessables</a></li>
-            </ul>
-        {% endif %}
-    </nav>
+            <a href="{{ url_for('main.index') }}" class="clean-link">Guessing Game</a>
+        </h1>
+        <nav class="buttons">
+            {% if current_user.is_active %}
+                <a href="{{ url_for('authentication.logout') }}" class="twitch-button clean-link nav-button">Log Out</a>
+            {% else %}
+                <a href="{{ url_for('authentication.login') }}" class="twitch-button clean-link nav-button">Log In with Twitch</a>
+            {% endif %}
+        </nav>
+    </div>
+    {% if current_user.is_active %}
+        <nav id="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+                    </li>
+                    <li><a href="{{ url_for('guessable.index') }}">Guessables</a></li>
+                </ul>
+        </nav>
+    {% endif %}
     <main>
         {% with messages = get_flashed_messages(with_categories=True) %}
           {% if messages %}
@@ -50,4 +72,5 @@
     </section>
 </div>
 </body>
+<script src="{{ url_for('static', filename='js/nav.js') }}"></script>
 </html>

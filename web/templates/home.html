@@ -1,5 +1,24 @@
 {% extends 'base.html' %}
 {% block title %}Welcome{% endblock %}
 {% block content %}
-    <p>A bot for your Twitch chat to play a guessing game.</p>
+    <h2>A bot for your Twitch chat to play a guessing game</h2>
+    <p>
+        If you need any help learning about or using the Guessing Game, check out the
+        <a href="{{ url_for('main.help') }}">Help page</a>. If you have a bug to report, join the Discord.
+    </p>
+    <p>
+        <a href="https://discord.gg/dZ3KSqC">
+            <img src="{{ url_for('static', filename='img/discord.png') }}" class="index-button" alt="Discord" />
+        </a>
+    </p>
+    <p>
+        If you want to help support the development of the Guessing Game consider becoming a Patron on Patreon.
+        You can get extended features, access to Patron-exclusive Discord channels,
+        or even priority bug reports and feature requests.
+    </p>
+    <p>
+        <a href="https://patreon.com/flagrama">
+            <img src="{{ url_for('static', filename='img/patreon.png') }}" class="index-button" alt="Discord" />
+        </a>
+    </p>
 {% endblock %}}
