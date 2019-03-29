@@ -34,6 +34,9 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
             users = [x[0] for x in Database.execute_select_sql(Database.SQL_GET_BOT_ENABLED_ROOMS)]
             for user in users:
                 self.redis_server.rpush('rejoin', user)
+            in_progress_games = self.redis_server.smembers('active_games')
+            for game in in_progress_games:
+                self.redis_server.rpush('pending_games', f"RESUME {game.decode('utf-8')}")
 
     def on_pubmsg(self, connection, event):
         # If a chat message starts with an exclamation point, try to run it as a command

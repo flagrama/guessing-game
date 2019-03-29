@@ -26,6 +26,8 @@ class GuessingGameManager(object):
             self.redis_server.delete(command[1])
             update_participant_sql = f"UPDATE participants SET current_points=0 FROM users WHERE participants.user_id=users.id AND users.twitch_login_name='{command[1].split('#')[1]}'"
             Database.execute_insert_update_sql(update_participant_sql)
+        if command[0] == "RESUME":
+            GuessingGame(command[1])
 
 
 class GuessingGame(object):
