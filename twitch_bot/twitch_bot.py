@@ -103,10 +103,17 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
             self.redis_server.publish(channel_name, f'GUESS {user_id} {variation}')
 
     def points_command(self, user_id, room_id, channel_name, username, type):
-        data = Database.execute_select_sql(Database.SQL_GET_POINTS.format(f"{type}", room_id, user_id))
-        if data:
-            points = data[0][0]
-            self.connection.privmsg(channel_name, f"{username} has {points} points in the active game.")
+        if type == "current_points":
+            user_points = self.redis_server.hget(f'{channel_name}_points', user_id)
+            if not user_points:
+                user_points = '0'.encode()
+            user_points = user_points.decode('utf-8')
+            self.connection.privmsg(channel_name, f"{username} has {user_points} points in the active game.")
+        else:
+            data = Database.execute_select_sql(Database.SQL_GET_POINTS.format(f"{type}", room_id, user_id))
+            if data:
+                user_points = data[0][0]
+                self.connection.privmsg(channel_name, f"{username} has {user_points} points.")
 
     def handle_messages(self, message):
         message = message.decode('utf-8')

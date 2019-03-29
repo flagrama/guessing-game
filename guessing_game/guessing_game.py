@@ -57,10 +57,19 @@ class GuessingGame(object):
                 current_variations = [item for sublist in variations for item in sublist if guessable in item]
                 if [item[0] for item in current_variations if guess.decode('utf-8') in item]:
                     user_id = user_id.decode('utf-8')
-                    get_participant_sql = f"SELECT points, current_points FROM participants JOIN users ON participants.user_id=users.id WHERE users.twitch_login_name='{channel.split('#')[1]}' AND participants.twitch_id={user_id}"
-                    points, current_points = Database.execute_select_sql(get_participant_sql)[0]
-                    update_participant_sql = f"UPDATE participants SET points={points + 1} FROM users WHERE participants.user_id=users.id AND users.twitch_login_name='{channel.split('#')[1]}' AND participants.twitch_id={user_id}"
-                    Database.execute_insert_update_sql(update_participant_sql)
-                    update_participant_sql = f"UPDATE participants SET current_points={current_points + 1} FROM users WHERE participants.user_id=users.id AND users.twitch_login_name='{channel.split('#')[1]}' AND participants.twitch_id={user_id}"
-                    Database.execute_insert_update_sql(update_participant_sql)
+                    user_points = self.redis_server.hget(f'{channel}_points', user_id)
+                    if not user_points:
+                        user_points = '0'.encode()
+                    self.redis_server.hset(f'{channel}_points', user_id, int(user_points.decode('utf-8')) + 1)
                     self.redis_server.hdel(f'{channel}_guesses', user_id)
+        if command == "FINISH":
+            all_user_points = self.redis_server.hgetall(f'{channel}_points')
+            for user in all_user_points:
+                user = user.decode('utf-8')
+                user_points = self.redis_server.hget(f'{channel}_points', user)
+                user_points = int(user_points.decode('utf-8'))
+                get_participant_sql = f"SELECT points FROM participants JOIN users ON participants.user_id=users.id WHERE users.twitch_login_name='{channel.split('#')[1]}' AND participants.twitch_id={user}"
+                points = Database.execute_select_sql(get_participant_sql)[0][0]
+                update_participant_sql = f"UPDATE participants SET points={points + user_points} FROM users WHERE participants.user_id=users.id AND users.twitch_login_name='{channel.split('#')[1]}' AND participants.twitch_id={user}"
+                Database.execute_insert_update_sql(update_participant_sql)
+                self.redis_server.hdel(f'{channel}_points', user)
