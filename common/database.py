@@ -6,6 +6,9 @@ import psycopg2
 SQL_PARTICIPANT_INSERT = "INSERT INTO participants " \
                          "(uuid, name, twitch_id, points, current_points, user_id) " \
                          "VALUES ('{}','{}', {}, 0, 0, {})"
+SQL_RESULT_INSERT = "INSERT INTO results " \
+                    "(uuid, datetime, results, user_id)" \
+                    "VALUES ('{}', '{}', {}, {})"
 SQL_GET_BOT_ENABLED_ROOMS = "SELECT {} FROM {} WHERE {}".format(
     'twitch_login_name',
     'users',
@@ -15,6 +18,11 @@ SQL_CHANNEL_USER_ID = "SELECT {} FROM {} WHERE {}".format(
     'id',
     'users',
     'users.twitch_id={}'
+)
+SQL_CHANNEL_USER_ID_BY_LOGIN = "SELECT {} FROM {} WHERE {}".format(
+    'id',
+    'users',
+    "users.twitch_login_name='{}'"
 )
 SQL_CURRENT_USER_VARIATIONS = "SELECT {} FROM {} JOIN {} ON {} WHERE {}".format(
     'variations',
@@ -40,11 +48,11 @@ SQL_GET_PARTICIPANT = "SELECT {} FROM {} JOIN {} ON {} WHERE {} AND {}".format(
     'participants.twitch_id={}'
 )
 SQL_GET_PARTICIPANT_TWITCH_LOGIN = "SELECT {} FROM {} JOIN {} ON {} WHERE {} AND {}".format(
-    '*',
+    '{}',
     'participants',
     'users',
     'participants.user_id=users.id',
-    'users.twitch_login={}',
+    "users.twitch_login_name='{}'",
     'participants.twitch_id={}'
 )
 SQL_GET_VARIATIONS_GUESSING_GAME = "SELECT {} FROM {} JOIN {} ON {} WHERE {}".format(
@@ -59,7 +67,7 @@ SQL_UPDATE_PARTICIPANT_POINTS = "UPDATE {} SET {} FROM {} WHERE {} AND {} AND {}
     'points={}',
     'users',
     'participants.user_id=users.id',
-    'users.twitch_login_name={}',
+    "users.twitch_login_name='{}'",
     'participants.twitch_id={}'
 )
 

@@ -1,4 +1,6 @@
 import os
+from uuid import uuid4
+from datetime import datetime, timezone
 
 import redis
 
@@ -61,9 +63,16 @@ class GuessingGame(object):
                     self.redis_server.hset(f'{channel}_points', user_id, int(user_points.decode('utf-8')) + 1)
                     self.redis_server.hdel(f'{channel}_guesses', user_id)
         if command == "FINISH":
+            from psycopg2.extras import Json
             all_user_points = self.redis_server.hgetall(f'{channel}_points')
+            all_user_points = {key.decode(): val.decode() for key, val in all_user_points.items()}
+            channel_twitch_id = Database.execute_select_sql(Database.SQL_CHANNEL_USER_ID_BY_LOGIN.format(
+                channel.split('#')[1]
+            ))[0][0]
+            Database.execute_insert_update_sql(Database.SQL_RESULT_INSERT.format(
+                uuid4(), datetime.now(timezone.utc), Json(all_user_points), channel_twitch_id)
+            )
             for user in all_user_points:
-                user = user.decode('utf-8')
                 user_points = self.redis_server.hget(f'{channel}_points', user)
                 user_points = int(user_points.decode('utf-8'))
                 get_participant_sql = Database.SQL_GET_PARTICIPANT_TWITCH_LOGIN.format(
