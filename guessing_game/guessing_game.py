@@ -67,8 +67,9 @@ class GuessingGame(object):
             all_user_points = self.redis_server.hgetall(f'{channel}_points')
             all_user_points = {key.decode(): val.decode() for key, val in all_user_points.items()}
             channel_user = User.get_user_by_twitch_login_name(channel.split('#')[1])
-            result = Result()
-            result.create_result(all_user_points, channel_user.id)
+            if all_user_points:
+                result = Result()
+                result.create_result(all_user_points, channel_user.id)
             for user in all_user_points:
                 user_points = self.redis_server.hget(f'{channel}_points', user)
                 user_points = int(user_points.decode('utf-8'))

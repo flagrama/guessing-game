@@ -102,8 +102,8 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         if result:
             self.redis_server.publish(channel_name, f'GUESS {user_id} {variation}')
 
-    def points_command(self, user_id, room_id, channel_name, username, type):
-        if type == "current_points":
+    def points_command(self, user_id, room_id, channel_name, username, point_type):
+        if point_type == "current_points":
             user_points = self.redis_server.hget(f'{channel_name}_points', user_id)
             if not user_points:
                 user_points = '0'.encode()
