@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from flask_login import UserMixin
 
 from web import db
@@ -44,6 +46,10 @@ class User(UserMixin, db.Model):
         return self.guessables
 
     @staticmethod
+    def get_user_by_twitch_login_name(twitch_login_name):
+        return User.query.filter_by(twitch_login_name=twitch_login_name).first()
+
+    @staticmethod
     def get_user_by_twitch_id(twitch_id):
         return User.query.filter_by(twitch_id=twitch_id).first()
 
@@ -80,6 +86,10 @@ class Participant(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    def add_points(self, n):
+        self.points += n
+        db.session.commit()
+
     @staticmethod
     def get_participant_by_twitch_ids(user_twitch_id, participant_twitch_id):
         return Participant.query.join(User).filter(
@@ -98,9 +108,15 @@ class Result(db.Model):
     __tablename__ = 'results'
 
     uuid = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    datetime = db.Column(db.DateTime)
+    datetime = db.Column(db.DateTime, default=datetime.now(timezone.utc))
     results = db.Column(JSONB)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    def create_result(self, results, user_id):
+        self.results = results
+        self.user_id = user_id
+        db.session.add(self)
+        db.session.commit()
 
 
 class Guessable(db.Model):
