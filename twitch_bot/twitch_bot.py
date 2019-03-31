@@ -1,10 +1,13 @@
 import os
-from uuid import uuid4
 
 import redis
 import irc.bot
 
-from common import ListListener, Database
+from common import ListListener
+from web import create_app
+from web.models import User, Guessable, Participant
+
+create_app('web.config.DatabaseOnlyConfig').app_context().push()
 
 
 class TwitchBot(irc.bot.SingleServerIRCBot):
@@ -31,9 +34,9 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         connection.cap('REQ', ':twitch.tv/commands')
 
         if os.environ.get('DYNO') == 'standard_bot.1':
-            users = [x[0] for x in Database.execute_select_sql(Database.SQL_GET_BOT_ENABLED_ROOMS)]
+            users = User.get_all_users_with_bot_enabled()
             for user in users:
-                self.redis_server.rpush('rejoin', user)
+                self.redis_server.rpush('rejoin', user.twitch_login_name)
             in_progress_games = self.redis_server.smembers('active_games')
             for game in in_progress_games:
                 self.redis_server.rpush('pending_games', f"RESUME {game.decode('utf-8')}")
@@ -83,21 +86,18 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
                 self.guess_command(user_id, room_id, event.target, username, args_list[1])
 
     def answer_command(self, room_id, variation, channel_name):
-        variations = [x for x in Database.execute_select_sql(Database.SQL_CURRENT_USER_VARIATIONS.format(room_id))]
+        variations = Guessable.get_all_users_variations(room_id)
         result = self.check_variations(variations, variation)
         if result:
             self.redis_server.publish(channel_name, f'ANSWER {variation}')
 
     def guess_command(self, user_id, room_id, channel_name, username, variation):
-        participant = Database.execute_select_sql(Database.SQL_GET_PARTICIPANT.format(room_id, user_id))
+        participant = Participant.get_participant_by_twitch_ids(room_id, user_id)
         if not participant:
-            channel_user_id = Database.execute_select_sql(Database.SQL_CHANNEL_USER_ID.format(room_id))[0][0]
-            create_participant_sql = Database.SQL_PARTICIPANT_INSERT.format(
-                uuid4(), username, user_id, channel_user_id
-            )
-            Database.execute_insert_update_sql(create_participant_sql)
-        variations = [x for x in Database.execute_select_sql(
-            Database.SQL_CURRENT_USER_VARIATIONS.format(room_id))]
+            participant = Participant()
+            channel_user_id = User.get_user_by_twitch_id(room_id).id
+            participant.create_participant(username, user_id, channel_user_id)
+        variations = Guessable.get_all_users_variations(room_id)
         result = self.check_variations(variations, variation)
         if result:
             self.redis_server.publish(channel_name, f'GUESS {user_id} {variation}')
@@ -110,10 +110,9 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
             user_points = user_points.decode('utf-8')
             self.connection.privmsg(channel_name, f"{username} has {user_points} points in the active game.")
         else:
-            data = Database.execute_select_sql(Database.SQL_GET_POINTS.format(f"{type}", room_id, user_id))
+            data = Participant.get_participant_points_by_twitch_ids(room_id, user_id)
             if data:
-                user_points = data[0][0]
-                self.connection.privmsg(channel_name, f"{username} has {user_points} points.")
+                self.connection.privmsg(channel_name, f"{username} has {data} points.")
 
     def handle_messages(self, message):
         message = message.decode('utf-8')
