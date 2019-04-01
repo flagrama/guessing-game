@@ -55,7 +55,7 @@ def __login_user(token, refresh_token):
     validation_json = twitch.validate_token(token)
     twitch_login = validation_json['login']
     new_token, new_refresh_token, twitch_user = (
-        twitch.get_users(token, refresh_token, twitch_login))
+        twitch.get_users_by_login(token, refresh_token, twitch_login))
     if new_token and new_token != token:
         session['twitch_token'] = new_token
     if new_refresh_token and new_refresh_token != refresh_token:

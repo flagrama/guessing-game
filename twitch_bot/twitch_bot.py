@@ -29,9 +29,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         rejoin_handler.start()
 
     def on_welcome(self, connection, event):
-        connection.cap('REQ', ':twitch.tv/membership')
-        connection.cap('REQ', ':twitch.tv/tags')
-        connection.cap('REQ', ':twitch.tv/commands')
+        connection.cap('REQ', 'twitch.tv/membership', 'twitch.tv/tags', 'twitch.tv/commands')
 
         if os.environ.get('DYNO') == 'standard_bot.1':
             users = User.get_all_users_with_bot_enabled()
