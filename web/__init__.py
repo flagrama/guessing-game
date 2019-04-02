@@ -33,6 +33,8 @@ def create_app(config):
         application.register_blueprint(bot)
         from web.blueprints.guessable import guessable
         application.register_blueprint(guessable, url_prefix="/guessables")
+        from web.blueprints.results import results
+        application.register_blueprint(results, url_prefix="/results")
 
         @application.before_request
         def validate_token():

@@ -15,6 +15,7 @@ class User(UserMixin, db.Model):
     bot_enabled = db.Column(db.Boolean, nullable=False)
     guessables = db.relationship("Guessable")
     participants = db.relationship("Participant")
+    results = db.relationship("Result")
 
     def __init__(self, twitch_id, twitch_login_name, twitch_display_name):
         self.twitch_id = twitch_id
@@ -47,6 +48,13 @@ class User(UserMixin, db.Model):
 
     def get_all_user_guessables(self):
         return self.guessables
+
+    def get_user_results(self):
+        self.results.sort(reverse=True, key=lambda r: r.datetime)
+        return self.results
+
+    def get_user_result(self, uuid):
+        return Result.get_result_by_uuid(uuid, self.id)
 
     @staticmethod
     def get_user_by_twitch_login_name(twitch_login_name):
@@ -116,6 +124,10 @@ class Result(db.Model):
         self.user_id = user_id
         db.session.add(self)
         db.session.commit()
+
+    @staticmethod
+    def get_result_by_uuid(uuid, user_id):
+        return Result.query.filter_by(uuid=uuid, user_id=user_id).first()
 
 
 class Guessable(db.Model):

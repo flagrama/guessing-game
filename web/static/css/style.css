@@ -177,3 +177,7 @@ main {
         grid-row: 3;
     }
 }
+
+td.points {
+    text-align: right;
+}

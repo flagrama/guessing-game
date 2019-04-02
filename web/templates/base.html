@@ -51,7 +51,15 @@
                     <li>
                         <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
                     </li>
-                    <li><a href="{{ url_for('guessable.index') }}">Guessables</a></li>
+                    <li>
+                        <a href="{{ url_for('guessable.index') }}">Guessables</a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('results.index') }}">Results</a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('main.help') }}">Help</a>
+                    </li>
                 </ul>
         </nav>
     {% endif %}
