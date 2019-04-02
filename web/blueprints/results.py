@@ -12,10 +12,6 @@ results = Blueprint('results', __name__)
 @results.route('/')
 def index():
     results = current_user.get_user_results()
-    print(results, flush=True)
-    for result in results:
-        print(result.uuid, flush=True)
-        print(result.datetime, flush=True)
     return render_template('results/index.html', results=results)
 
 
