@@ -39,6 +39,9 @@ class User(UserMixin, db.Model):
     def count_user_guessables(self):
         return len(self.guessables)
 
+    def get_user_guessable(self, uuid):
+        return Guessable.get_guessable_by_uuid(uuid, self.id)
+
     def get_user_guessables(self):
         return self.guessables[:30]
 
@@ -56,10 +59,6 @@ class User(UserMixin, db.Model):
     @staticmethod
     def get_user_by_id(user_id):
         return User.query.filter_by(id=user_id).first()
-
-    @staticmethod
-    def get_user_guessable(uuid):
-        return Guessable.get_guessable_by_uuid(uuid)
 
     @staticmethod
     def get_all_users_with_bot_enabled():
@@ -150,8 +149,8 @@ class Guessable(db.Model):
         db.session.commit()
 
     @staticmethod
-    def get_guessable_by_uuid(uuid):
-        return Guessable.query.filter_by(uuid=uuid).first()
+    def get_guessable_by_uuid(uuid, user_id):
+        return Guessable.query.filter_by(uuid=uuid, user_id=user_id).first()
 
     @staticmethod
     def get_all_users_variations(twitch_id):
