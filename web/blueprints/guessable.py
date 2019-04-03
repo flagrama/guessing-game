@@ -24,7 +24,11 @@ def create():
             request.form['guessable_name'], request.form['guessable_variations'], None
         )
         if errors:
-            return render_template('guessable/create.html', errors=errors)
+            return render_template(
+                'guessable/create.html',
+                name=request.form['guessable_name'],
+                variations=request.form['guessable_variations'],
+                errors=errors)
         new_guessable = Guessable()
         new_guessable.create_guessable(name, variations, current_user.id)
         return redirect(url_for('guessable.index'))
@@ -33,16 +37,24 @@ def create():
 
 @guessable.route('/edit/<uuid:uuid>', methods=['GET', 'POST'])
 def update(uuid):
+    current_guessable = Guessable.get_guessable_by_uuid(uuid, current_user.id)
+    variations = ','
+    variations = variations.join(current_guessable.variations)
     if request.form:
         name, variations, errors = validate_input(
             request.form['guessable_name'], request.form['guessable_variations'], uuid
         )
         if errors:
-            return render_template('guessable/update.html', errors=errors)
+            return render_template(
+                'guessable/update.html',
+                name=request.form['guessable_name'],
+                variations=request.form['guessable_variations'],
+                errors=errors
+            )
         current_guessable = current_user.get_user_guessable(uuid)
         current_guessable.update_guessable(name, variations)
         return redirect(url_for('guessable.index'))
-    return render_template('guessable/update.html')
+    return render_template('guessable/update.html', name=current_guessable.name, variations=variations)
 
 
 @guessable.route('/delete/<uuid:uuid>', methods=['POST'])

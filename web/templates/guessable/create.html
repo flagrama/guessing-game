@@ -8,12 +8,12 @@
             <label for="guessable_name" class="form-labels">
                 <span>Guessable Name</span>
             </label>
-            <input type="text" id="guessable_name" name="guessable_name" class="form-inputs" />
+            <input type="text" id="guessable_name" name="guessable_name" class="form-inputs" value="{{ name }}" />
             <label for="guessable_variations" class="form-labels">
                 <span>Guessable Variations</span>
                 <strong><abbr title="comma-separated">*</abbr></strong>
             </label>
-            <input type="text" id="guessable_variations" name="guessable_variations" class="form-inputs" />
+            <input type="text" id="guessable_variations" name="guessable_variations" class="form-inputs" value="{{ variations }}" />
             <input type="submit" value="Create Guessable" class="form-submit" />
         </div>
     </fieldset>
