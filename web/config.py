@@ -8,6 +8,7 @@ class Config(object):
     DEBUG = False
     TESTING = False
     DEVELOPMENT = False
+    DB_ONLY = False
     SECRET_KEY = os.environ['SECRET_KEY']
     TWITCH_STATE = os.environ['TWITCH_STATE']
     TWITCH_CLIENT_ID = os.environ['TWITCH_CLIENT_ID']
@@ -36,3 +37,7 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = DATABASE_URL = 'sqlite:///:memory:'
+
+
+class DatabaseOnlyConfig(Config):
+    DB_ONLY = True

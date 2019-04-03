@@ -1,5 +1,4 @@
-from . import listeners, database
+from . import listeners
 
 SubscriptionListener = listeners.SubscriptionListener
 ListListener = listeners.ListListener
-Database = database

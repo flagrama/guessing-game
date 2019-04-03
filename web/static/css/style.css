@@ -1,3 +1,7 @@
+html {
+    font-family: Helvetica, Arial, sans-serif;
+}
+
 .grid {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
@@ -64,7 +68,7 @@
     background-color: black;
     margin-top: -10px;
     margin-left: -10px;
-    margin-right: -10px;
+    margin-right: -8px;
     padding-left: 20px;
     padding-right: 20px;
     padding-bottom: 20px;
@@ -116,7 +120,7 @@ a#nav-button {
 
 nav ul {
     list-style-type: none;
-    margin: 0;
+    margin: 0 0 0 2vh;
     padding: 0;
 }
 
@@ -135,8 +139,19 @@ main {
     padding-top: 2em;
 }
 
-@media (min-width: 40.625em) {
+@media (min-width: 47.5em) {
+    .grid {
+        grid-template-rows: auto 86.2vh auto;
+    }
+
     nav#sidebar-nav {
+        grid-row-start: 2;
+        grid-row-end: 4;
+        grid-column-start: 1;
+        grid-column-end: 3;
+        margin-right: 10px;
+        margin-bottom: -0.9vh;
+        padding-bottom: 0;
         display: block;
     }
 
@@ -144,9 +159,18 @@ main {
         display:none;
         float: none;
     }
+
+    main {
+        grid-row: 2;
+    }
+
+    .footer {
+        grid-row: 3;
+    }
 }
 
 @media (min-width: 26.563em) {
+
     .flex-container {
         flex-direction: row;
         padding-bottom: 0;
@@ -160,20 +184,8 @@ main {
     a#nav-button {
         align-self: center;
     }
+}
 
-    nav#sidebar-nav {
-        grid-row-start: 2;
-        grid-row-end: 4;
-        grid-column: auto;
-        margin-right: 10px;
-        padding-bottom: 0;
-    }
-
-    main {
-        grid-row: 2;
-    }
-
-    .footer {
-        grid-row: 3;
-    }
+td.points {
+    text-align: right;
 }

@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Results{% endblock %}
+{% block content %}
+<h2>Results</h2>
+{% for result in results %}
+<p>
+    <a href="{{ url_for('results.read', uuid=result.uuid) }}">{{ result.datetime }}</a>
+</p>
+{% endfor %}
+{% endblock %}}
