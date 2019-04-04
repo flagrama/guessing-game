@@ -4,7 +4,7 @@ from flask_login import UserMixin
 
 from web import db
 
-
+from sqlalchemy.orm.attributes import flag_modified
 class User(UserMixin, db.Model):
     from sqlalchemy.dialects.postgresql import JSONB
     __tablename__ = 'users'
@@ -62,9 +62,14 @@ class User(UserMixin, db.Model):
         return self.whitelist
 
     def add_to_whitelist(self, twitch_user_id):
-        from sqlalchemy.orm.attributes import flag_modified
         if twitch_user_id not in self.whitelist:
             self.whitelist.append(twitch_user_id)
+            flag_modified(self, 'whitelist')
+            db.session.commit()
+
+    def remove_from_whitelist(self, twitch_user_id):
+        if twitch_user_id in self.whitelist:
+            self.whitelist.remove(twitch_user_id)
             flag_modified(self, 'whitelist')
             db.session.commit()
 

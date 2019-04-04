@@ -59,6 +59,9 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
             if command == "whitelist":
                 if len(args_list) > 1:
                     new_user = twitch.client_get_users_by_login(args_list[1])
+                    if len(new_user['data']) == 0:
+                        self.connection.privmsg(event.target, f'User {args_list[1]} not found on Twitch.')
+                        return
                     new_user_id = new_user['data'][0]['id']
                     if self.redis_server.sismember('WHITELIST_' + room_id, new_user_id):
                         self.connection.privmsg(event.target, f'User {args_list[1]} is already in whitelist.')
@@ -67,6 +70,20 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
                     user = User.get_user_by_twitch_id(room_id)
                     user.add_to_whitelist(new_user_id)
                     self.connection.privmsg(event.target, f'User {args_list[1]} has been added to whitelist.')
+            if command == "remwhitelist":
+                if len(args_list) > 1:
+                    new_user = twitch.client_get_users_by_login(args_list[1])
+                    if len(new_user['data']) == 0:
+                        self.connection.privmsg(event.target, f'User {args_list[1]} not found on Twitch.')
+                        return
+                    new_user_id = new_user['data'][0]['id']
+                    if not self.redis_server.sismember('WHITELIST_' + room_id, new_user_id):
+                        self.connection.privmsg(event.target, f'User {args_list[1]} is not in the whitelist.')
+                        return
+                    self.redis_server.srem('WHITELIST_' + room_id, new_user_id)
+                    user = User.get_user_by_twitch_id(room_id)
+                    user.remove_from_whitelist(new_user_id)
+                    self.connection.privmsg(event.target, f'User {args_list[1]} has been removed from whitelist.')
         if user_id == room_id or is_mod or is_whitelist:
             if command == "start":
                 if not is_active and not is_pending:
