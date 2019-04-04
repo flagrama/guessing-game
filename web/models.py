@@ -6,6 +6,7 @@ from web import db
 
 
 class User(UserMixin, db.Model):
+    from sqlalchemy.dialects.postgresql import JSONB
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -13,6 +14,7 @@ class User(UserMixin, db.Model):
     twitch_login_name = db.Column(db.String)
     twitch_display_name = db.Column(db.String)
     bot_enabled = db.Column(db.Boolean, nullable=False)
+    whitelist = db.Column(JSONB, default=[])
     guessables = db.relationship("Guessable")
     participants = db.relationship("Participant")
     results = db.relationship("Result")
@@ -55,6 +57,15 @@ class User(UserMixin, db.Model):
 
     def get_user_result(self, uuid):
         return Result.get_result_by_uuid(uuid, self.id)
+
+    def get_user_whitelist(self):
+        return self.whitelist
+
+    def add_to_whitelist(self, twitch_user_id):
+        from sqlalchemy.orm.attributes import flag_modified
+        self.whitelist.append(twitch_user_id)
+        flag_modified(self, 'whitelist')
+        db.session.commit()
 
     @staticmethod
     def get_user_by_twitch_login_name(twitch_login_name):

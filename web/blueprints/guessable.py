@@ -38,8 +38,7 @@ def create():
 @guessable.route('/edit/<uuid:uuid>', methods=['GET', 'POST'])
 def update(uuid):
     current_guessable = Guessable.get_guessable_by_uuid(uuid, current_user.id)
-    variations = ','
-    variations = variations.join(current_guessable.variations)
+    ','.join(current_guessable.variations)
     if request.form:
         name, variations, errors = validate_input(
             request.form['guessable_name'], request.form['guessable_variations'], uuid
