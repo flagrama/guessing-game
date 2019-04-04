@@ -63,9 +63,10 @@ class User(UserMixin, db.Model):
 
     def add_to_whitelist(self, twitch_user_id):
         from sqlalchemy.orm.attributes import flag_modified
-        self.whitelist.append(twitch_user_id)
-        flag_modified(self, 'whitelist')
-        db.session.commit()
+        if twitch_user_id not in self.whitelist:
+            self.whitelist.append(twitch_user_id)
+            flag_modified(self, 'whitelist')
+            db.session.commit()
 
     @staticmethod
     def get_user_by_twitch_login_name(twitch_login_name):
