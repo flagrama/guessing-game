@@ -59,6 +59,7 @@ def refresh_token(token_refresh_token):
 def get_users_by_login(token, refresh, user_names, allow_refresh=True):
     if not isinstance(user_names, list):
         user_names = [user_names]
+    param_list = []
     data = {'data': []}
     parameters = {'login': []}
     for user in user_names:
@@ -67,26 +68,29 @@ def get_users_by_login(token, refresh, user_names, allow_refresh=True):
         if cached_user:
             data['data'].append(json.loads(cached_user.decode('utf-8')))
             continue
-        parameters['login'].append(user)
-    if parameters['login']:
+        param_list.append(user)
+    if param_list:
         headers = {'Authorization': f'Bearer {token}'}
-        response = requests.get(twitch_api_base + '/users', params=parameters, headers=headers)
-        if response is None:
-            return None, None, None
-        if response.status_code == 401 and 'www-authenticate' in response.headers and allow_refresh:
-            token, refresh = refresh_token(refresh)
-            if token is None or refresh is None:
+        for i in range(0, len(param_list), 100):
+            parameters['login'].append(param_list[i:i + 100])
+            response = requests.get(twitch_api_base + '/users', params=parameters, headers=headers)
+            if response is None:
                 return None, None, None
-            return get_users_by_login(token, refresh, user_names, allow_refresh=False)
-        response_json = json.loads(response.text)
-        [app.config['REDIS'].setex('TWITCH_API_' + x['login'], 86400, json.dumps(x)) for x in response_json['data']]
-        [data['data'].append(x) for x in response_json['data']]
+            if response.status_code == 401 and 'www-authenticate' in response.headers and allow_refresh:
+                token, refresh = refresh_token(refresh)
+                if token is None or refresh is None:
+                    return None, None, None
+                return get_users_by_login(token, refresh, user_names, allow_refresh=False)
+            response_json = json.loads(response.text)
+            [app.config['REDIS'].setex('TWITCH_API_' + x['login'], 86400, json.dumps(x)) for x in response_json['data']]
+            [data['data'].append(x) for x in response_json['data']]
     return token, refresh, data
 
 
 def client_get_users_by_login(user_names):
     if not isinstance(user_names, list):
         user_names = [user_names]
+    param_list = []
     data = {'data': []}
     parameters = {'login': []}
     for user in user_names:
@@ -95,21 +99,24 @@ def client_get_users_by_login(user_names):
         if cached_user:
             data['data'].append(json.loads(cached_user.decode('utf-8')))
             continue
-        parameters['login'].append(user)
-    if parameters['login']:
+        param_list.append(user)
+    if param_list:
         headers = {'Client-ID': os.environ.get('TWITCH_CLIENT_ID')}
-        response = requests.get(twitch_api_base + '/users', params=parameters, headers=headers)
-        if response is None:
-            return None
-        response_json = json.loads(response.text)
-        [app.config['REDIS'].setex('TWITCH_API_' + x['login'], 86400, json.dumps(x)) for x in response_json['data']]
-        [data['data'].append(x) for x in response_json['data']]
+        for i in range(0, len(param_list), 100):
+            parameters['login'].append(param_list[i:i + 100])
+            response = requests.get(twitch_api_base + '/users', params=parameters, headers=headers)
+            if response is None:
+                return None
+            response_json = json.loads(response.text)
+            [app.config['REDIS'].setex('TWITCH_API_' + x['login'], 86400, json.dumps(x)) for x in response_json['data']]
+            [data['data'].append(x) for x in response_json['data']]
     return data
 
 
 def get_users_by_id(token, refresh, ids, allow_refresh=True):
     if not isinstance(ids, list):
         ids = [ids]
+    param_list = []
     data = {'data': []}
     parameters = {'id': []}
     for user in ids:
@@ -118,18 +125,20 @@ def get_users_by_id(token, refresh, ids, allow_refresh=True):
         if cached_id:
             data['data'].append(json.loads(cached_id.decode('utf-8')))
             continue
-        parameters['id'].append(user)
-    if parameters['id']:
+        param_list.append(user)
+    if param_list:
         headers = {'Authorization': f'Bearer {token}'}
-        response = requests.get(twitch_api_base + '/users', params=parameters, headers=headers)
-        response_json = json.loads(response.text)
-        [app.config['REDIS'].setex('TWITCH_API_' + x['id'], 86400, json.dumps(x)) for x in response_json['data']]
-        [data['data'].append(x) for x in response_json['data']]
-        if response is None:
-            return None, None, None
-        if response.status_code == 401 and 'www-authenticate' in response.headers and allow_refresh:
-            token, refresh = refresh_token(refresh)
-            if token is None or refresh is None:
+        for i in range(0, len(param_list), 100):
+            parameters['id'].append(param_list[i:i + 100])
+            response = requests.get(twitch_api_base + '/users', params=parameters, headers=headers)
+            if response is None:
                 return None, None, None
-            return get_users_by_id(token, refresh, ids, allow_refresh=False)
+            if response.status_code == 401 and 'www-authenticate' in response.headers and allow_refresh:
+                token, refresh = refresh_token(refresh)
+                if token is None or refresh is None:
+                    return None, None, None
+                return get_users_by_id(token, refresh, ids, allow_refresh=False)
+            response_json = json.loads(response.text)
+            [app.config['REDIS'].setex('TWITCH_API_' + x['id'], 86400, json.dumps(x)) for x in response_json['data']]
+            [data['data'].append(x) for x in response_json['data']]
     return token, refresh, data
