@@ -141,7 +141,7 @@ main {
 
 @media (min-width: 47.5em) {
     .grid {
-        grid-template-rows: auto 86.2vh auto;
+        grid-template-rows: 3em minmax(calc(100vh - 7em), auto) 1em;
     }
 
     nav#sidebar-nav {
@@ -150,7 +150,7 @@ main {
         grid-column-start: 1;
         grid-column-end: 3;
         margin-right: 10px;
-        margin-bottom: -0.9vh;
+        margin-bottom: -2.5em;
         padding-bottom: 0;
         display: block;
     }

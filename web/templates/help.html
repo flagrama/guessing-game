@@ -1,23 +1,146 @@
 {% extends 'base.html' %}
 {% block title %}Help{% endblock %}
 {% block content %}
+<h2>Table of Contents</h2>
+<ul>
+    <li><a href="#what-is-guessing-game">What is Guessing Game?</a></li>
+    <li><a href="#general-setup">General Setup</a></li>
+    <ul>
+        <li><a href="#sign-in-and-dashboard">Sign In & Dashboard</a></li>
+        <li><a href="#invite-guessgamebot-to-your-channel">Invite GuessGameBot to Your Channel</a></li>
+        <li><a href="#setting-up-guessable-items">Setting Up Guessable Items</a></li>
+    </ul>
+    <li><a href="#running-a-guessing-game">Running a Guessing Game</a></li>
+    <ul>
+        <li><a href="#starting-a-guessing-game">Starting a Guessing Game</a></li>
+        <li><a href="#marking-a-guess-correct">Marking a Guess Correct</a></li>
+        <li><a href="#finishing-a-guessing-game">Finishing a Guessing Game</a></li>
+        <li><a href="#adding-users-to-whitelist">Adding Users to Whitelist</a></li>
+        <li><a href="#removing-users-from-whitelist">Removing Users from Whitelist</a></li>
+    </ul>
+    <li><a href="#participating-in-a-guessing-game">Participating in a Guessing Game</a></li>
+    <ul>
+        <li><a href="#making-a-guess">Making a Guess</a></li>
+        <li><a href="#checking-your-points">Checking Your Points</a></li>
+    </ul>
+</ul>
+
+<h2 id="what-is-guessing-game">What is Guessing Game?</h2>
 <p>
-    You can log in with your Twitch account, then add "Guessables" by giving them a name and a comma-separated list of
-    "Variations" which allow several different terms to all map to the same item. Then enable the bot from the Dashboard
-    and it will join your Twitch chat.
+    The Guessing Game is a website that allows you to invite a bot to your Twitch stream to run a guessing game for your
+    chat. The broadcaster, moderators, or users whitelisted by them can start a guessing game, end it, or mark guesses
+    as correct. While a guessing game is running, anybody in chat can make a guess. If a guess is marked as correct any
+    players who made that guess earn points.
 </p>
 
+<h2 id="general-setup">General Setup</h2>
 <p>
-    In your chat you or a moderator can start a guessing game with the "!start" command and finish one with the
-    "!finish" command. With a game started anybody in chat can type "!guess variation" to make a guess of "variation"
-    and any new guess will overwrite and old one. You or a moderator can then proceed to give the answer using the
-    "!answer variation" to mark an item as the answer. This will remove all correct guesses and give those chatters a
-    point, but leave incorrect guesses in memory.
+    The following is a general guide on how get started using the Guessing Game in your Twitch chat.
 </p>
 
+<h3 id="sign-in-and-dashboard">Sign In & Dashboard</h3>
 <p>
-    During a Guessing Game a chatter can type "!points" to be told how many points they have in the current game. While
-    a Guessing Game is not active the "!points" command will tell how many total points they have acquired throughout
-    the entire lifetime of the bot in your channel.
+    To get started head to the <a href="{{ url_for('main.index') }}">Guessing Game homepage</a> and sign in using
+    Twitch. Once you grant access you'll be redirected to the homepage and a sidebar with links to various configuration
+    options for the bot.
+
+    The <a href="{{ url_for('main.dashboard') }}">Dashboard</a> is where you will be able to invite the bot to your chat
+    or request it to leave.
+</p>
+
+<h3 id="invite-guessgamebot-to-your-channel">Invite GuessGameBot to Your Channel</h3>
+<p>
+    On the Dashboard click <em>Enable</em> to invite the bot to your channel. If you wish to remove the bot from your
+    channel after it has been invited you can click the button now labeled <em>Disable</em> and it will leave.
+</p>
+
+<h3 id="setting-up-guessable-items">Setting Up Guessable Items</h3>
+<p>
+    In order to make a guess or mark a guess as correct, you need to set up things to actually guess. For Guessing Game
+    these are called <em>Guessables</em>.
+</p>
+<p>
+    When you create a Guessable you give it a Name to distinguish it from your other Guessables. You also give it a list
+    of Variations. Variations are all of the words that mean the same thing as the item. Variations will be converted to
+    lowercase and must be a single alphanumeric word.
+</p>
+<p>
+    For example, if you were creating a Guessable for the Lens of Truth in the Ocarina of Time Randomizer you would
+    create a Guessable with the name <strong>Lens of Truth</strong> and would use Variations like
+    <strong>lens, lot</strong> and you may choose to use <strong>lensoftruth</strong> as well, but cannot use
+    <strong>lens_of_truth</strong> as underscores are not permitted.
+</p>
+
+<h2 id="running-a-guessing-game">Running a Guessing Game</h2>
+<p>
+    The following is a guide on how to manage running a Guessing Game in your chat. These commands can only be run by
+    you or your moderators. Whitelisted users can also run most of these commands. They cannot add or remove whitelisted
+    users however.
+</p>
+
+<h3 id="starting-a-guessing-game">Starting a Guessing Game</h3>
+<p>
+    To begin a Guessing Game you type <strong>!start</strong> in your chat. The bot will respond saying a Guessing Game
+    has been started so you can confirm it is active in your channel and has received your command.
+</p>
+<p>
+    This command will not work if a Guessing Game has already been started.
+</p>
+
+<h3 id="marking-a-guess-correct">Marking a Guess Correct</h3>
+<p>
+    Once you want to mark a guess as correct type <strong>!answer &lt;variation&gt;</strong> and it will remove all the
+    guesses in the guess set that match the same item as the variation you typed and give those players a point.
+</p>
+
+<h3 id="finishing-a-guessing-game">Finishing a Guessing Game</h3>
+<p>
+    To finish a Guessing Game you type <strong>!finish</strong> in your chat. The bot will respond saying a Guessing
+    Game has been finished so you can confirm it has received your command.
+</p>
+<p>
+    This command will not work if a Guessing Game has not been started.
+</p>
+
+<h3 id="adding-users-to-whitelist">Adding Users to Whitelist</h3>
+<p>
+    If you don't want to give someone Moderator status in your chat but you still want them to be able to run a Guessing
+    Game, you can add them to the bot's whitelist. Sending <strong>!whitelist &lt;user_login_name&gt;</strong> in chat
+    will add them to the whitelist and the bot will send a message confirming the command was received and if it worked.
+</p>
+
+<h3 id="removing-users-from-whitelist">Removing Users from Whitelist</h3>
+<p>
+    To remove a user you no longer want running Guessing Games in your chat simply send
+    <strong>!remwhitelist &lt;user_login_name&gt;</strong> in chat and they will be removed from the whitelist. The bot
+    will send a message to let you know if the command worked or not.
+</p>
+
+<h2 id="participating-in-a-guessing-game">Participating in a Guessing Game</h2>
+<p>
+    These are the commands that players can use in your chat.
+</p>
+
+<h3 id="making-a-guess">Making a Guess</h3>
+<p>
+    In order to make a guess you send <strong>!guess &lt;variation&gt;</strong> in chat. If you have already made a
+    guess it will be replaced with the new guess.
+</p>
+<p>
+    Keep in mind when you make a correct guess your old guess will be removed, but if you are making incorrect guesses
+    you will retain your guess so you don't have to enter it again.
+</p>
+<p>
+    There is currently no feedback that a guess was accepted or not. This will likely be added at a later date.
+</p>
+
+<h3 id="checking-your-points">Checking Your Points</h3>
+<p>
+    During a Guessing Game you can type <strong>!points</strong> and the bot will respond in chat telling how many
+    points you have earned in the current Guessing Game.
+</p>
+<p>
+    Outside of a Guessing Game the <strong>!points</strong> command will have the bot respond in chat with how many
+    total points you have earned in the current channel.
 </p>
 {% endblock %}}

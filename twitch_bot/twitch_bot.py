@@ -4,7 +4,7 @@ import redis
 import irc.bot
 
 from common import ListListener
-from web import create_app
+from web import create_app, twitch
 from web.models import User, Guessable, Participant
 
 create_app('web.config.DatabaseOnlyConfig').app_context().push()
@@ -12,8 +12,6 @@ create_app('web.config.DatabaseOnlyConfig').app_context().push()
 
 class TwitchBot(irc.bot.SingleServerIRCBot):
     def __init__(self, username, token):
-        self.client_id = os.environ.get('TWITCH_BOT_CLIENT_ID')
-
         self.redis_server = redis.Redis.from_url(os.environ.get('REDIS_URL'))
         command_handler = ListListener(self.handle_messages, self.redis_server, ['standard_bot'])
         rejoin_handler = ListListener(self.handle_rejoins, self.redis_server, ['rejoin'])
@@ -49,6 +47,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
     def do_command(self, event, command):
         user_id = self.get_tag(event.tags, 'user-id')
         room_id = self.get_tag(event.tags, 'room-id')
+        is_whitelist = self.redis_server.sismember('WHITELIST_' + room_id, user_id)
         is_mod = bool(int(self.get_tag(event.tags, 'mod')))
         active_games = self.redis_server.smembers('active_games')
         pending_games = self.redis_server.lrange('pending_games', 0, -1)
@@ -57,6 +56,35 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         args_list = event.arguments[0].lower().split(' ')
 
         if user_id == room_id or is_mod:
+            if command == "whitelist":
+                if len(args_list) > 1:
+                    new_user = twitch.client_get_users_by_login(args_list[1])
+                    if len(new_user['data']) == 0:
+                        self.connection.privmsg(event.target, f'User {args_list[1]} not found on Twitch.')
+                        return
+                    new_user_id = new_user['data'][0]['id']
+                    if self.redis_server.sismember('WHITELIST_' + room_id, new_user_id):
+                        self.connection.privmsg(event.target, f'User {args_list[1]} is already in whitelist.')
+                        return
+                    self.redis_server.sadd('WHITELIST_' + room_id, new_user_id)
+                    user = User.get_user_by_twitch_id(room_id)
+                    user.add_to_whitelist(new_user_id)
+                    self.connection.privmsg(event.target, f'User {args_list[1]} has been added to whitelist.')
+            if command == "remwhitelist":
+                if len(args_list) > 1:
+                    new_user = twitch.client_get_users_by_login(args_list[1])
+                    if len(new_user['data']) == 0:
+                        self.connection.privmsg(event.target, f'User {args_list[1]} not found on Twitch.')
+                        return
+                    new_user_id = new_user['data'][0]['id']
+                    if not self.redis_server.sismember('WHITELIST_' + room_id, new_user_id):
+                        self.connection.privmsg(event.target, f'User {args_list[1]} is not in the whitelist.')
+                        return
+                    self.redis_server.srem('WHITELIST_' + room_id, new_user_id)
+                    user = User.get_user_by_twitch_id(room_id)
+                    user.remove_from_whitelist(new_user_id)
+                    self.connection.privmsg(event.target, f'User {args_list[1]} has been removed from whitelist.')
+        if user_id == room_id or is_mod or is_whitelist:
             if command == "start":
                 if not is_active and not is_pending:
                     self.redis_server.rpush('pending_games', f'START {event.target}')
@@ -123,9 +151,13 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
             self.connection.part(f'#{message[5:]}')
 
     def handle_rejoins(self, message):
+        create_app('web.config.DatabaseOnlyConfig').app_context().push()
         message = message.decode('utf-8')
 
         self.connection.join(f'#{message}')
+        user = User.get_user_by_twitch_login_name(message)
+        for whitelist_user in user.whitelist:
+            self.redis_server.sadd('WHITELIST_' + str(user.twitch_id), str(whitelist_user))
 
     @staticmethod
     def check_variations(variations, user_variation):
