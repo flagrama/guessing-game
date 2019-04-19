@@ -10,7 +10,6 @@ class Config(object):
     DEVELOPMENT = False
     DB_ONLY = False
     SECRET_KEY = os.environ['SECRET_KEY']
-    TWITCH_STATE = os.environ['TWITCH_STATE']
     TWITCH_CLIENT_ID = os.environ['TWITCH_CLIENT_ID']
     TWITCH_SECRET = os.environ['TWITCH_SECRET']
     SQLALCHEMY_DATABASE_URI = DATABASE_URL = os.environ['DATABASE_URL']

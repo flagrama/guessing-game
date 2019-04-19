@@ -1,3 +1,6 @@
+import string
+import random
+
 from flask import (
     Blueprint, url_for, session, redirect, flash, request
 )
@@ -17,7 +20,9 @@ def login():
         return redirect(url_for('index'))
     session['next_url'] = request.args.get('next')
     redirect_uri = url_for('authentication.authorized', _external=True)
-    return redirect(twitch.authorize(redirect_uri, app.config['TWITCH_STATE']))
+    state = __generate_state()
+    session['state'] = state
+    return redirect(twitch.authorize(redirect_uri, state))
 
 
 @authentication.route('/login/authorized')
@@ -25,7 +30,7 @@ def authorized():
     redirect_uri = url_for('authentication.authorized', _external=True)
     authorization_code = request.args.get('code')
     csrf_state = request.args.get('state')
-    if csrf_state != app.config['TWITCH_STATE']:
+    if csrf_state != session.pop('state', None):
         flash('Access denied')
         return redirect('/')
     if authorization_code:
@@ -78,3 +83,7 @@ def __login_user(token, refresh_token):
         login_user(user)
         return True
     return False
+
+
+def __generate_state():
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=20))
